@@ -2,107 +2,87 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import {
-  Box,
-  Flex,
-  Grid,
-  HStack,
-  VStack,
-  Heading,
-  Text,
-  Button,
-  Separator,
-} from '@chakra-ui/react'
+import { Layout, Menu, Typography, Button, Space } from 'antd'
+
+const { Header, Sider, Content } = Layout
+const { Text } = Typography
 
 export default function ProfileLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
+const selectedKey = pathname.startsWith('/profile/saved_houses')
+  ? 'saved'
+  : pathname.startsWith('/profile/my_listings')
+  ? 'listings'
+  : 'about'
 
   return (
-    <Box>
-      {/* ===== Navbar ===== */}
-      <Flex
-        as="header"
-        w="full"
-        bg="white"
-        boxShadow="sm"
-        px={8}
-        py={4}
-        align="center"
-        justify="space-between"
-        _dark={{ bg: 'gray.800' }}
-      >
-        <Text fontSize="xl" fontWeight="bold" color="gray.800" _dark={{ color: 'white' }}>
-          BURROW
-        </Text>
+    <Layout style={{ minHeight: '100vh', background: '#f5f5f5' }}>
+      {/* Navbar (same as homepage, but "Home" instead of "Profile") */}
+<Header
+  style={{
+    background: '#fff',
+    paddingInline: 24,
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderBottom: '1px solid #f0f0f0',
+  }}
+>
+  <Typography.Text strong style={{ fontSize: 18 }}>BURROW</Typography.Text>
 
-        <HStack gap={4}>
-          {/* CHANGED: Profile -> Home */}
-          <Button asChild variant="ghost" color="gray.800" _dark={{ color: 'white' }}>
-            <Link href="/homepage">{/* use "/" if your home is at app/page.tsx */}
-              Home
-            </Link>
-          </Button>
-          <Button asChild variant="ghost" color="gray.800" _dark={{ color: 'white' }}>
-            <Link href="/settings">Settings</Link>
-          </Button>
-          <Button colorScheme="blue">Logout</Button>
-        </HStack>
-      </Flex>
-
-      {/* ===== Content area ===== */}
-      <Box maxW="7xl" mx="auto" px={{ base: 4, md: 8 }} py={8}>
-        <Heading size="lg" mb={6}>Profile</Heading>
-
-        <Grid templateColumns={{ base: '1fr', lg: '260px 1fr' }} gap={8}>
-          {/* Sidebar */}
-          <VStack align="stretch" gap={3}>
-            <SidebarItem
-              href="/profile/about_me"
-              label="About me"
-              active={pathname.startsWith('/profile/about_me')}
-            />
-            <SidebarItem
-              href="/profile/saved_houses"
-              label="Saved houses"
-              active={pathname.startsWith('/profile/saved_houses')}
-            />
-            <Separator />
-          </VStack>
-
-          {/* Page-specific content */}
-          <Box>{children}</Box>
-        </Grid>
-      </Box>
-    </Box>
-  )
-}
-
-/* -------- Sidebar item helper -------- */
-function SidebarItem({
-  href,
-  label,
-  active = false,
-}: {
-  href: string
-  label: string
-  active?: boolean
-}) {
-  return (
-    <Link href={href}>
-      <HStack
-        gap={3}
-        p={3}
-        borderRadius="xl"
-        bg={active ? 'blackAlpha.50' : 'transparent'}
-        _dark={{ bg: active ? 'whiteAlpha.200' : 'transparent' }}
-        borderWidth={active ? '1px' : '0px'}
-        borderColor={active ? 'blackAlpha.200' : 'transparent'}
-        cursor="pointer"
-        _hover={{ bg: 'blackAlpha.100', _dark: { bg: 'whiteAlpha.300' } }}
-      >
-        <Box w="8" h="8" borderRadius="full" bg="gray.200" _dark={{ bg: 'gray.600' }} />
-        <Text fontWeight="medium">{label}</Text>
-      </HStack>
+  <Space>
+    <Link href="/homepage">
+      <Button type="text">Home</Button>
     </Link>
+
+    {/* NEW: Add Listing button */}
+    <Link href="/profile/my_listings/add_listing">
+      <Button type="text">Add Listing</Button>
+    </Link>
+
+    <Link href="/settings">
+      <Button type="text">Settings</Button>
+    </Link>
+
+    <Button type="text">Logout</Button>
+  </Space>
+</Header>
+
+
+      {/* Sidebar + content */}
+      <Layout>
+        <Sider
+          width={220}
+          style={{
+            background: '#fff',
+            borderRight: '1px solid #f0f0f0',
+            paddingTop: 8,
+          }}
+        >
+            <Menu
+            mode="inline"
+            selectedKeys={[selectedKey]}
+            items={[
+                { key: 'about', label: <Link href="/profile/about_me">About Me</Link> },
+                { key: 'saved', label: <Link href="/profile/saved_houses">Saved Houses</Link> },
+                { key: 'listings', label: <Link href="/profile/my_listings">My Listings</Link> }, // ✅ new item
+            ]}
+            />
+
+        </Sider>
+
+        <Content
+          style={{
+            background: '#fff',
+            margin: '24px',
+            padding: 24,
+            borderRadius: 12,
+            boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+          }}
+        >
+          {children}
+        </Content>
+      </Layout>
+    </Layout>
   )
 }

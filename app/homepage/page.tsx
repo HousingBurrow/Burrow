@@ -1,232 +1,189 @@
-"use client";
-import Link from "next/link";
+'use client'
 
+import Link from 'next/link'
+import React, { useState } from 'react'
 import {
-  Flex,
-  Input,
+  Layout,
+  Typography,
+  Space,
   Button,
-  HStack,
-  VStack,
-  Box,
-  Text,
-  Separator,
-  Grid,
-  GridItem,
-  Image,
-  NativeSelect,
-} from "@chakra-ui/react";
-import { SearchIcon } from "@chakra-ui/icons";
-import React, { useState, FC } from "react";
+  Select,
+  DatePicker,
+  InputNumber,
+  Row,
+  Col,
+  Card,
+} from 'antd'
+import { SearchOutlined } from '@ant-design/icons'
+import dayjs, { Dayjs } from 'dayjs'
 
-export const SearchBar: FC = () => {
-  const [location, setLocation] = useState("");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
-  const [rooms, setRooms] = useState("");
-  const [isFocused, setIsFocused] = useState(false);
+const { Header, Content } = Layout
+const { Title, Text } = Typography
+
+/* ---------------- Search Bar (antd) ---------------- */
+function SearchBar() {
+  const [location, setLocation] = useState<string>()
+  const [startDate, setStartDate] = useState<Dayjs | null>(null)
+  const [endDate, setEndDate] = useState<Dayjs | null>(null)
+  const [rooms, setRooms] = useState<number | null>(1)
+
+  const locations = ['Midtown', 'North Avenue', 'Home Park', 'West Midtown']
 
   const handleSearch = () => {
-    console.log({ location, startDate, endDate, rooms });
-  };
-
-  const locations = ["Midtown", "North Avenue", "Home Park", "West Midtown"];
+    console.log({
+      location,
+      startDate: startDate?.format('YYYY-MM-DD'),
+      endDate: endDate?.format('YYYY-MM-DD'),
+      rooms,
+    })
+  }
 
   return (
-    <HStack
-      maxW="1000px"
-      w="full"
-      borderRadius="full"
-      boxShadow={isFocused ? "md" : "sm"}
-      border="1px solid"
-      borderColor={isFocused ? "blue.400" : "gray.200"}
-      overflow="hidden"
-      transition="all 0.2s"
-      px={4}
-      py={2}
-      bg="white"
+    <Space
+      size="large"
+      style={{
+        width: '100%',
+        maxWidth: 1000,
+        padding: 12,
+        borderRadius: 999,
+        background: '#fff',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+        justifyContent: 'space-between',
+      }}
+      wrap
     >
-      {/* Location NativeSelect */}
-      <VStack flex={2} gap={1} align="stretch" px={4}>
-        <Text fontSize="s" color="gray.800">
-          Where
-        </Text>
-        <NativeSelect.Root size="md" width="100%">
-          <NativeSelect.Field
-            placeholder="Select location"
-            value={location}
-            onChange={(e) => setLocation(e.currentTarget.value)}
-            _focus={{ boxShadow: "none" }}
-            color="gray.800"
-            border="none"
-            bg="transparent"
-          >
-            {locations.map((loc) => (
-              <option key={loc} value={loc}>
-                {loc}
-              </option>
-            ))}
-          </NativeSelect.Field>
-          <NativeSelect.Indicator />
-        </NativeSelect.Root>
-      </VStack>
+      <div style={{ minWidth: 180 }}>
+        <Text strong>Where</Text>
+        <Select
+          placeholder="Select location"
+          value={location}
+          onChange={setLocation}
+          options={locations.map((l) => ({ label: l, value: l }))}
+          style={{ width: '100%', marginTop: 4 }}
+          allowClear
+        />
+      </div>
 
-      {/* Divider */}
-      <Separator orientation="vertical" h="48px" />
-
-      {/* Start Date */}
-      <VStack flex={1} gap={1} align="stretch" px={4}>
-        <Text fontSize="s" color="gray.800">
-          Start Date
-        </Text>
-        <Input
-          type="date"
+      <div style={{ minWidth: 180 }}>
+        <Text strong>Start date</Text>
+        <DatePicker
           value={startDate}
-          onChange={(e) => setStartDate(e.target.value)}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
-          border="none"
-          color="black"
-          _focus={{ boxShadow: "none" }}
+          onChange={setStartDate}
+          style={{ width: '100%', marginTop: 4 }}
+          disabledDate={(d) => !!endDate && d.isAfter(endDate, 'day')}
         />
-      </VStack>
+      </div>
 
-      {/* Divider */}
-      <Separator orientation="vertical" h="48px" />
-
-      {/* End Date */}
-      <VStack flex={1} gap={1} align="stretch" px={4}>
-        <Text fontSize="s" color="gray.800">
-          End Date
-        </Text>
-        <Input
-          type="date"
+      <div style={{ minWidth: 180 }}>
+        <Text strong>End date</Text>
+        <DatePicker
           value={endDate}
-          onChange={(e) => setEndDate(e.target.value)}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
-          border="none"
-          color="black"
-          _focus={{ boxShadow: "none" }}
+          onChange={setEndDate}
+          style={{ width: '100%', marginTop: 4 }}
+          disabledDate={(d) => !!startDate && d.isBefore(startDate, 'day')}
         />
-      </VStack>
+      </div>
 
-      {/* Divider */}
-      <Separator orientation="vertical" h="48px" />
-
-      {/* Number of Rooms */}
-      <VStack flex={1} gap={1} align="stretch" px={4}>
-        <Text fontSize="s" color="gray.800">
-          Rooms
-        </Text>
-        <Input
-          type="number"
+      <div style={{ minWidth: 140 }}>
+        <Text strong>Rooms</Text>
+        <InputNumber
           min={1}
-          placeholder="Number of Rooms"
-          value={rooms}
-          onChange={(e) => setRooms(e.target.value)}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
-          border="none"
-          color="black"
-          _focus={{ boxShadow: "none" }}
+          value={rooms ?? 1}
+          onChange={(v) => setRooms(v ?? 1)}
+          style={{ width: '100%', marginTop: 4 }}
         />
-      </VStack>
+      </div>
 
-      {/* Search Button */}
       <Button
+        type="primary"
+        icon={<SearchOutlined />}
         onClick={handleSearch}
-        colorScheme="blue"
-        borderRadius="full"
-        ml={2}
+        style={{ borderRadius: 999 }}
       >
-        <SearchIcon style={{ marginRight: "0.5em" }} />
         Search
       </Button>
-    </HStack>
-  );
-};
+    </Space>
+  )
+}
 
+/* ---------------- Home Page (antd) ---------------- */
 export default function HomePage() {
   const listings = [
     {
       id: 1,
-      title: "Cozy dorm near campus",
-      location: "Georgia Tech",
-      price: "$500/month",
-      image: "https://via.placeholder.com/300x200",
+      title: 'Cozy dorm near campus',
+      location: 'Georgia Tech',
+      price: '$500/month',
+      image: 'https://via.placeholder.com/600x400?text=Listing',
     },
-    
-  ];
+  ]
 
   return (
-    <Flex direction="column" minH="100vh" bg="gray.50">
+    <Layout style={{ minHeight: '100vh', background: '#f5f5f5' }}>
       {/* Header */}
-      <Flex
-        as="header"
-        w="full"
-        bg="white"
-        boxShadow="sm"
-        px={8}
-        py={4}
-        align="center"
-        justify="space-between"
+      <Header
+        style={{
+          background: '#fff',
+          paddingInline: 24,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          borderBottom: '1px solid #f0f0f0',
+        }}
       >
-        <Text fontSize="xl" fontWeight="bold" color="gray.800">
-          BURROW
-        </Text>
-        <HStack gap={4}>
+        <Typography.Text strong style={{ fontSize: 18 }}>BURROW</Typography.Text>
+
+        <Space>
           <Link href="/profile/about_me">
-            <Button variant="ghost" color="gray.800" _hover={{ bg: "gray.300" }}>
-              Profile
-            </Button>
+            <Button type="text">Profile</Button>
           </Link>
-          <Button variant="ghost" color="gray.800" _hover={{ bg: "gray.300"}}>
-            Settings
-          </Button>
-          <Button variant="ghost" color="gray.800" _hover={{ bg: "gray.300"}}>
-            Logout
-          </Button>
-        </HStack>
-      </Flex>
 
-      {/* Search bar */}
-      <Flex justify="center" mt={8} px={4}>
-        <SearchBar />
-      </Flex>
+          {/* NEW: Add Listing button */}
+          <Link href="/profile/my_listings/new">
+            <Button type="text">Add Listing</Button>
+          </Link>
 
-      {/* Listings */}
-      <Box flex={1} px={8} py={6}>
-        <Grid templateColumns="repeat(auto-fill, minmax(250px, 1fr))" gap={6}>
-          {listings.map((listing) => (
-            <GridItem
-              key={listing.id}
-              bg="white"
-              borderRadius="md"
-              boxShadow="sm"
-              overflow="hidden"
-            >
-              <Image
-                src={listing.image}
-                alt={listing.title}
-                objectFit="cover"
-                w="100%"
-                h="150px"
-              />
-              <VStack align="start" gap={1} p={4}>
-                <Text fontWeight="bold" color="gray.800">
-                  {listing.title}
-                </Text>
-                <Text fontSize="sm" color="gray.700">
-                  {listing.location}
-                </Text>
-                <Text fontWeight="semibold" color="gray.800">
-                  {listing.price}
-                </Text>
-              </VStack>
-            </GridItem>
+          <Link href="/settings">
+            <Button type="text">Settings</Button>
+          </Link>
+
+          <Button type="text">Logout</Button>
+        </Space>
+      </Header>
+
+
+      <Content style={{ padding: '32px 24px' }}>
+        {/* Search bar */}
+        <div style={{ display: 'grid', placeItems: 'center', marginBottom: 24 }}>
+          <SearchBar />
+        </div>
+
+        {/* Listings */}
+        <Row gutter={[16, 16]}>
+          {listings.map((l) => (
+            <Col key={l.id} xs={24} sm={12} md={8} lg={6}>
+              <Card
+                hoverable
+                cover={
+                  <img
+                    src={l.image}
+                    alt={l.title}
+                    style={{ height: 160, width: '100%', objectFit: 'cover' }}
+                  />
+                }
+              >
+                <Title level={5} style={{ marginBottom: 4 }}>
+                  {l.title}
+                </Title>
+                <Text type="secondary">{l.location}</Text>
+                <div style={{ marginTop: 8 }}>
+                  <Text strong>{l.price}</Text>
+                </div>
+              </Card>
+            </Col>
           ))}
-        </Grid>
-      </Box>
-    </Flex>
-  );
+        </Row>
+      </Content>
+    </Layout>
+  )
 }
