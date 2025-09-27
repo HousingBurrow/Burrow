@@ -2,7 +2,7 @@
 
 import { User } from "@prisma/client";
 import { ActionResult } from '../utils/action-result';
-import { prisma } from '../../lib/prisma';
+import { prisma } from '../../../lib/prisma';
 
 
 interface CreateUserProps {
