@@ -9,5 +9,4 @@ export const stackClientApp = new StackClientApp({
     signIn: "/auth/sign-in",
     signUp: "/auth/sign-up",
   },
-  },
-);
+});
