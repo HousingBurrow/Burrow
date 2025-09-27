@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Provider } from "@/components/ui/provider";
+import { StackProvider, StackTheme } from "@stackframe/stack";
+import { stackClientApp } from "@/stack/client";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,12 +21,20 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout(props: { children: React.ReactNode }) {
-  const { children } = props
+  const { children } = props;
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
-        <Provider>{children}</Provider>
+        <StackProvider app={stackClientApp}>
+          <StackTheme>
+            <StackProvider app={stackClientApp}>
+              <StackTheme>
+                <Provider>{children}</Provider>
+              </StackTheme>
+            </StackProvider>
+          </StackTheme>
+        </StackProvider>
       </body>
     </html>
-  )
+  );
 }
