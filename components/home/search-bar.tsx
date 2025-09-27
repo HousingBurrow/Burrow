@@ -4,6 +4,9 @@ import z from "zod";
 import dayjs from "dayjs";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { LocationEnum } from "@/lib/schemas";
+import { startCase } from "lodash";
+import { Location } from "@prisma/client";
 
 const { RangePicker } = DatePicker;
 
@@ -18,7 +21,9 @@ const priceRangeSchema = z
   });
 
 export const searchFormSchema = z.object({
-  location: z.string().min(1, "Location is required").optional(),
+  location: z
+    .enum(["Midtown", "WestMidtown", "HomePark", "NorthAvenue"])
+    .optional(),
   range: z
     .object({
       start: z.date(),
@@ -40,7 +45,6 @@ export const searchFormSchema = z.object({
   price: priceRangeSchema.optional(),
 });
 
-const locations = ["Midtown", "North Avenue", "Home Park", "West Midtown"];
 const priceOptions = ["500", "1000", "1500", "2000", "2500", "3000"];
 
 interface SearchBarProps {
@@ -91,9 +95,9 @@ export const SearchBar = ({ onSearchClicked }: SearchBarProps) => {
               }}
               status={errors.location ? "error" : undefined}
             >
-              {locations.map((loc) => (
+              {Object.keys(Location).map((loc) => (
                 <Select.Option key={loc} value={loc}>
-                  {loc}
+                  {startCase(loc)}
                 </Select.Option>
               ))}
             </Select>

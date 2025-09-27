@@ -12,7 +12,11 @@ export const metadata: Metadata = {
   description: "Your one stop shop for everything subleasing",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
@@ -20,23 +24,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <StackTheme>
             <Provider>
               <ClientProviders>
-                <div
-                  style={{
-                    minHeight: "100vh",
-                    minWidth: "100vw",
-                    height: "100vh",
-                    width: "100vw",
-                  }}
-                >
-                  {/* Wrap only client components that use useUser in Suspense */}
-                  <Suspense fallback={<div>Loading user...</div>}>
+                <Suspense>
+                  <div
+                    style={{
+                      width: "100%",
+                      minHeight: "100vh",
+                    }}
+                  >
                     <Header />
-                  </Suspense>
-
-                  <div style={{ height: "100%", width: "100%" }}>
-                    {children}
+                    <div style={{ width: "100%" }}>{children}</div>
                   </div>
-                </div>
+                </Suspense>
               </ClientProviders>
             </Provider>
           </StackTheme>
