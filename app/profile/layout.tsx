@@ -30,9 +30,9 @@ export default function ProfileLayout({ children }: { children: React.ReactNode 
             mode="inline"
             selectedKeys={[selectedKey]}
             items={[
-              { key: 'about', label: <Link href="/profile/about_me">About Me</Link> },
-              { key: 'saved', label: <Link href="/profile/saved_houses">Saved Houses</Link> },
-              { key: 'listings', label: <Link href="/profile/my_listings">My Listings</Link> },
+                { key: 'about', label: <Link href="/profile/about_me">About Me</Link> },
+                { key: 'saved', label: <Link href="/profile/saved_houses">Saved Houses</Link> },
+                { key: 'listings', label: <Link href="/profile/my_listings">My Listings</Link> },
             ]}
           />
         </Sider>
