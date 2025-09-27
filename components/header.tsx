@@ -50,7 +50,7 @@ export function Header() {
           <Link href="/profile/about_me"><Button type="text">Profile</Button></Link>
         )}
 
-        <Link href="/settings">
+        <Link href="/settings/">
           <Button type="text">Settings</Button>
         </Link>
 
