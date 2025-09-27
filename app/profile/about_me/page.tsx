@@ -14,7 +14,7 @@ export default function AboutMePage() {
             Priarie
           </Typography.Title>
 
-          {/* ✅ About me section */}
+          {/* About me section */}
           <Typography.Paragraph type="secondary" style={{ textAlign: 'center', marginTop: 8 }}>
             Hi, I’m Priarie. I love traveling, meeting new people, and finding cozy homes in the city.
           </Typography.Paragraph>

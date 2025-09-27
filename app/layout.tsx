@@ -1,22 +1,19 @@
-import type { Metadata } from "next";
-import "./globals.css";
-import { Provider } from "@/components/ui/provider";
-import { StackProvider, StackTheme } from "@stackframe/stack";
-import { Suspense } from "react";
-import { Header } from "@/components/header";
-import { stackServerApp } from "@/stack/server";
-import ClientProviders from "@/components/client-providers";
+// app/layout.tsx
+import { ConfigProvider } from 'antd';
+import { StackProvider, StackTheme } from '@stackframe/stack';
+import { Provider } from '@/components/ui/provider';
+import ClientProviders from '@/components/client-providers';
+import { Suspense } from 'react';
+import { Header } from '@/components/header';
+import { stackServerApp } from '@/stack/server'; // server-only
+import './globals.css';
 
-export const metadata: Metadata = {
-  title: "Burrow",
-  description: "Your one stop shop for everything subleasing",
+export const metadata = {
+  title: 'Burrow',
+  description: 'Your one stop shop for everything subleasing',
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
@@ -24,17 +21,23 @@ export default function RootLayout({
           <StackTheme>
             <Provider>
               <ClientProviders>
-                <Suspense>
-                  <div
-                    style={{
-                      width: "100%",
-                      minHeight: "100vh",
-                    }}
-                  >
-                    <Header />
-                    <div style={{ width: "100%" }}>{children}</div>
-                  </div>
-                </Suspense>
+                <ConfigProvider
+                  theme={{
+                    token: {
+                      colorPrimary: '#6F826A', // primary color
+                      borderRadius: 8,
+                      colorText: '#000000',
+                      colorBgBase: '#ffffff',
+                    },
+                  }}
+                >
+                  <Suspense>
+                    <div style={{ width: '100%', minHeight: '100vh' }}>
+                      <Header /> {/* Header can be a client component */}
+                      <div style={{ width: '100%' }}>{children}</div>
+                    </div>
+                  </Suspense>
+                </ConfigProvider>
               </ClientProviders>
             </Provider>
           </StackTheme>
