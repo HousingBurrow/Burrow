@@ -7,7 +7,7 @@ import { getAllListings } from "@/lib/queries/listings";
 import { AppListing } from "@/lib/schemas";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { Col, Divider, Row } from "antd";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import z from "zod";
 
@@ -21,6 +21,22 @@ export default function HomePage() {
     z.infer<typeof searchFormSchema> | undefined
   >();
 
+  useEffect(() => console.log(filterState), [filterState])
+
+  // Transform SearchBar format to getAllListings format
+  const transformFilters = (searchData: z.infer<typeof searchFormSchema> | undefined) => {
+    if (!searchData) return undefined;
+    
+    return {
+      location: searchData.location,
+      rooms: searchData.rooms,
+      maxPrice: searchData.price?.upper,
+      minPrice: searchData.price?.lower,
+      startDate: searchData.range?.start,
+      endDate: searchData.range?.end,
+    };
+  };
+
   const {
     data: listings,
     fetchNextPage,
@@ -30,10 +46,11 @@ export default function HomePage() {
   } = useInfiniteQuery({
     queryKey: ["listings", JSON.stringify(filterState)],
     queryFn: async ({ pageParam }: { pageParam: string | undefined }) => {
+      const transformedFilters = transformFilters(filterState);
       const response = await getAllListings({
         encodedCursor: pageParam,
         limit: 12,
-        filters: filterState,
+        filters: transformedFilters,
       });
       if (response.isError) {
         throw new Error(response.message);
