@@ -14,17 +14,40 @@ export interface ListingCardProps {
   onViewDetails?: () => void;
 }
 
-const ListingCard: FC<ListingCardProps> = ({ title, location, price, image, onViewDetails }) => {
+const ListingCard: FC<ListingCardProps> = ({
+  title,
+  location,
+  price,
+  image,
+  onViewDetails,
+}) => {
   return (
-    <Card hoverable cover={<img alt={title} src={image} />}>
-      <Title level={5}>{title}</Title>
+    <Card
+      hoverable
+      cover={
+        <img
+          src={image}
+          alt={title}
+          style={{ height: 180, width: "100%", objectFit: "cover" }}
+        />
+      }
+    >
+      <Title level={5} style={{ marginBottom: 4 }}>
+        {title}
+      </Title>
       <Text type="secondary">{location}</Text>
-      <br />
-      <Text strong>{price}</Text>
+      <div style={{ marginTop: 8 }}>
+        <Text strong>{price}</Text>
+      </div>
       {onViewDetails && (
         <>
           <br />
-          <Button type="primary" style={{ marginTop: 8 }} onClick={onViewDetails}>
+          <Button
+            type="primary"
+            block
+            style={{ marginTop: 8 }}
+            onClick={onViewDetails}
+          >
             View Details
           </Button>
         </>

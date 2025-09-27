@@ -1,30 +1,33 @@
-'use client'
+"use client";
 
-import { Row, Space, Button } from 'antd'
-import Title from 'antd/es/typography/Title'
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { Row, Space, Button } from "antd";
+import Title from "antd/es/typography/Title";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useUser, useStackApp } from "@stackframe/stack";
 
 export function Header() {
-  const pathname = usePathname()
-  const isProfilePage = pathname.startsWith('/profile')
+  const pathname = usePathname();
+  const isProfilePage = pathname.startsWith("/profile");
+  const user = useUser();
+  const app = useStackApp();
 
   return (
     <Row
       style={{
-        background: '#fff',
-        padding: '16px 32px',
-        flexDirection: 'row',
-        display: 'flex',
-        justifyContent: 'space-between',
-        borderBottom: '1px solid #f0f0f0',
+        background: "#fff",
+        padding: "16px 32px",
+        display: "flex",
+        justifyContent: "space-between",
+        borderBottom: "1px solid #f0f0f0",
       }}
     >
       <Link href="/">
-      <Title level={3} style={{ margin: 0 }}>
+        <Title level={3} style={{ margin: 0 }}>
           BURROW
         </Title>
       </Link>
+
       <Space>
         {isProfilePage ? (
           <Link href="/">
@@ -39,9 +42,20 @@ export function Header() {
         <Link href="/settings">
           <Button type="text">Settings</Button>
         </Link>
-        
-        <Button type="text">Logout</Button>
+
+        {!user ? (
+          <>
+            <Button type="primary" onClick={() => app.redirectToSignIn()}>
+              Login
+            </Button>
+            <Button onClick={() => app.redirectToSignUp()}>Sign Up</Button>
+          </>
+        ) : (
+          <Button type="primary" onClick={() => user.signOut()}>
+            Logout
+          </Button>
+        )}
       </Space>
     </Row>
-  )
+  );
 }

@@ -35,7 +35,7 @@ const selectedKey = pathname.startsWith('/profile/saved_houses')
             items={[
                 { key: 'about', label: <Link href="/profile/about_me">About Me</Link> },
                 { key: 'saved', label: <Link href="/profile/saved_houses">Saved Houses</Link> },
-                { key: 'listings', label: <Link href="/profile/my_listings">My Listings</Link> }, // ✅ new item
+                { key: 'listings', label: <Link href="/profile/my_listings">My Listings</Link> },
             ]}
             />
 
