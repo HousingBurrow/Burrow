@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import ClientSettings from './ClientSettings'; // Fixed import path
+export const dynamic = 'force-dynamic';
 
 export default async function SettingsPage() {
   // TODO: replace with real auth user id
