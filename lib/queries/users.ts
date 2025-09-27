@@ -37,43 +37,29 @@ export async function createUser({
   }
 }
 
-export async function updateUser(
-  id: number,
-  email?: string, // used as a WHERE filter if provided
-  firstName?: string,
-  lastName?: string,
-  gender?: string,
-  age?: number
-) {
-  // Build data object (map camelCase -> DB fields) and strip undefineds
-  const data = Object.fromEntries(
-    Object.entries({
+type updateUserProps = {
+  id: number;
+  email?: string;
+  firstName?: string;
+  lastName?: string;
+  age?: number;
+  gender?: string;
+}
+export async function updateUser({ id, email, firstName, lastName, age, gender }: updateUserProps): ActionResult<User> {
+  try {
+    const user = await prisma.user.update({ where: { id }, data: {
+      email: email,
       first_name: firstName,
       last_name: lastName,
-      gender,
-      age,
-    }).filter(([, v]) => v !== undefined)
-  );
-
-  if (Object.keys(data).length === 0) {
-    throw new Error("No fields to update");
+      age: age,
+      gender: gender,
+    }});
+    return {isError: false, data: user};
+  } catch (e) {
+    console.log("Error updating user", e);
+    return {isError: true, message: (e as Error).message};
   }
-
-  // Prefer updating by email if provided; else use id
-  if (email) {
-    const result = await prisma.user.updateMany({
-      where: { email },
-      data,
-    });
-    return result.count; // number of rows updated (0 or 1 typically)
-  } else {
-    await prisma.user.update({
-      where: { id },
-      data,
-    });
-    return 1;
-  }
-}
+} 
 
 // returns users given userID
 export async function getUserById(id: number): ActionResult<User> {
