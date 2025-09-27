@@ -70,7 +70,7 @@ export default function HomePage() {
   const handleCancel = () => setIsModalOpen(false);
 
   return (
-    <div>
+    <div style={{ maxWidth: "100%", overflow: "hidden" }}>
       {/* Search bar */}
       <Row justify="center" style={{ padding: "32px" }}>
         <Col>
@@ -84,11 +84,18 @@ export default function HomePage() {
           if (!isFetchingNextPage) fetchNextPage();
         }}
         hasMore={!!hasNextPage}
-        loader={<p>Loading...</p>}
-        endMessage={<Divider plain>It is all, nothing more 🤐</Divider>}
+        loader={
+          <div>
+            <Divider>Digging deeper...</Divider>
+          </div>
+        }
+        endMessage={
+          <Divider plain>You&apos;ve reached the end of the world</Divider>
+        }
         scrollThreshold={0.9} // triggers when 90% of page scrolled
+        style={{ width: "100%" }}
       >
-        <Row gutter={[16, 16]} style={{ padding: "32px" }}>
+        <Row gutter={[16, 16]} style={{ padding: "32px", width: "100%" }}>
           {listings?.pages
             .flatMap((page) => page.data)
             .map((listing) => (
@@ -100,7 +107,7 @@ export default function HomePage() {
                     price: Number(listing.price),
                     imageUrl: listing.imageUrls[0],
                   }}
-                  onViewDetails={() => showModal(listing)}
+                  onClick={() => showModal(listing)}
                 />
               </Col>
             ))}

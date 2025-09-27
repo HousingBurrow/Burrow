@@ -1,32 +1,33 @@
 "use client";
+"use client";
 
-import React, { useState, useTransition, useEffect } from "react";
+import { deleteUser, updateUser } from "@/lib/queries/users";
 import {
+  Avatar,
+  Button,
+  Card,
+  Col,
   Form,
   Input,
-  Select,
-  Switch,
-  Button,
-  Avatar,
-  Typography,
-  Card,
   message,
-  Tabs,
-  Space,
   Row,
-  Col,
+  Select,
+  Space,
+  Switch,
+  Tabs,
+  Typography,
 } from "antd";
+import { useState, useTransition } from "react";
 import {
-  FiUser,
-  FiSettings,
   FiBell,
-  FiShield,
   FiCamera,
+  FiSettings,
+  FiShield,
   FiTrash2,
+  FiUser,
 } from "react-icons/fi";
-import { updateUser, deleteUser } from "@/lib/queries/users";
-import { signOut } from "next-auth/react";
 import "./settings.css";
+import { useUser } from "@stackframe/stack";
 
 const { Title, Text } = Typography;
 const { TabPane } = Tabs;
@@ -34,7 +35,12 @@ const { TabPane } = Tabs;
 const genders = ["Male", "Female", "Other", "Prefer not to say"] as const;
 type Gender = (typeof genders)[number];
 
-const locations = ["Midtown", "WestMidtown", "HomePark", "NorthAvenue"] as const;
+const locations = [
+  "Midtown",
+  "WestMidtown",
+  "HomePark",
+  "NorthAvenue",
+] as const;
 type DefaultLocation = (typeof locations)[number];
 
 type SettingsState = {
@@ -57,6 +63,8 @@ export default function ClientSettings({
 }) {
   const [formData, setFormData] = useState<SettingsState>(initial);
   const [saving, startTransition] = useTransition();
+
+  const user = useUser();
 
   // ------------------- Handle input changes -------------------
   const handleInputChange = <K extends keyof SettingsState>(
@@ -83,7 +91,6 @@ export default function ClientSettings({
     });
   };
 
-  // ------------------- Delete user -------------------
   const handleDelete = async () => {
     const confirm = window.confirm(
       "Are you sure you want to delete your account? This action is irreversible."
@@ -94,10 +101,10 @@ export default function ClientSettings({
     if (res.isError) message.error(res.message || "Failed to delete account");
     else {
       message.success("Account deleted successfully");
-      await signOut({ callbackUrl: "/" });
+      user?.signOut();
     }
   };
-  
+
   return (
     <div style={{ minHeight: "100vh", padding: 32 }}>
       <Card

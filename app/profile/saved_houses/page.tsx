@@ -58,7 +58,7 @@ export default function MyListingsPage() {
                   price: Number(listing.price),
                   imageUrl: listing.imageUrls[0],
                 }}
-                onViewDetails={() => showModal(listing)}
+                onClick={() => setIsModalOpen}
               />
             </Col>
           ))}
