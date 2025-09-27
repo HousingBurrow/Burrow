@@ -4,10 +4,11 @@ export const stackClientApp = new StackClientApp({
   tokenStore: "nextjs-cookie",
   urls: {
     home: "/",
-    afterSignIn: "/",
-    afterSignUp: "/auth/sign-up/account-information",
-    signIn: "/auth/sign-in",
     signUp: "/auth/sign-up",
+    signIn: "/auth/sign-in",
+    afterSignUp: "/auth/sign-up/account-information",
+    afterSignIn: "/",
+    oauthCallback: "/handler/oauth-callback",
+    handler: "/handler",
   },
-  },
-);
+});
