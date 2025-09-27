@@ -1,16 +1,15 @@
 "use client";
 
-import { useUser, useStackApp } from '@stackframe/stack';
-import { Row, Space, Button } from 'antd';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import Image from 'next/image';
+import { useUser, useStackApp } from "@stackframe/stack";
+import { Row, Space, Button } from "antd";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import Image from "next/image";
 
 export function Header() {
   const pathname = usePathname();
   const isProfilePage = pathname.startsWith("/profile");
   const user = useUser();
-  const app = useStackApp();
 
   return (
     <Row
@@ -23,7 +22,7 @@ export function Header() {
         alignItems: "center", // ✅ center content vertically
         borderBottom: "1px solid #f0f0f0",
         top: 0,
-        zIndex: 1000
+        zIndex: 1000,
       }}
     >
       {/* Logo area */}
@@ -39,7 +38,7 @@ export function Header() {
         <Image
           src="/logo.png"
           alt="Burrow Logo"
-          width={200}   // adjust size here
+          width={200} // adjust size here
           height={200}
           style={{ objectFit: "contain" }}
         />
@@ -47,9 +46,13 @@ export function Header() {
 
       <Space>
         {isProfilePage ? (
-          <Link href="/"><Button type="text">Home</Button></Link>
+          <Link href="/">
+            <Button type="text">Home</Button>
+          </Link>
         ) : (
-          <Link href="/profile/about_me"><Button type="text">Profile</Button></Link>
+          <Link href="/profile/about_me">
+            <Button type="text">Profile</Button>
+          </Link>
         )}
 
         <Link href="/settings/">
@@ -58,10 +61,12 @@ export function Header() {
 
         {!user ? (
           <>
-            <Button type="primary" onClick={() => app.redirectToSignIn()}>
-              Login
-            </Button>
-            <Button onClick={() => app.redirectToSignUp()}>Sign Up</Button>
+            <Link href="/handler/sign-in">
+              <Button type="primary">Log In</Button>
+            </Link>
+            <Link href="/handler/sign-up">
+              <Button>Sign Up</Button>
+            </Link>
           </>
         ) : (
           <Button type="primary" onClick={() => user.signOut()}>
