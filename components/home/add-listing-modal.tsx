@@ -19,11 +19,12 @@ import {
 } from 'antd'
 import { PlusOutlined, InboxOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
+import { AppListing } from '@/lib/schemas'
 
 type AddListingModalProps = {
   open: boolean
   onClose: () => void
-  onCreated?: (listing: any) => void
+  onCreated?: (listing: AppListing) => void
 }
 
 const { Title, Text } = Typography
@@ -73,7 +74,7 @@ export function AddListingModal({ open, onClose, onCreated }: AddListingModalPro
 
   const priceParser = (v?: string) => (v ? Number(v.replace(/[^\d.-]/g, '')) : 0)
 
-  const onFinish = async (values: any) => {
+  const onFinish = async (values: AppListing) => {
     // TODO: Replace with your real API
     // await fetch('/api/listings', { method: 'POST', body: JSON.stringify(values) })
     onCreated?.(values)
