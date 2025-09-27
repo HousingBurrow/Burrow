@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 
 import {
   Flex,
@@ -174,9 +175,11 @@ export default function HomePage() {
           BURROW
         </Text>
         <HStack gap={4}>
-          <Button variant="ghost" color="gray.800" _hover={{ bg: "gray.300"}}>
-            Profile
-          </Button>
+          <Link href="/profile/about_me">
+            <Button variant="ghost" color="gray.800" _hover={{ bg: "gray.300" }}>
+              Profile
+            </Button>
+          </Link>
           <Button variant="ghost" color="gray.800" _hover={{ bg: "gray.300"}}>
             Settings
           </Button>
