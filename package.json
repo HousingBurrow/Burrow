@@ -16,10 +16,10 @@
   },
   "dependencies": {
     "@chakra-ui/icons": "^2.2.4",
-    "@hookform/resolvers": "^5.2.2",
     "@chakra-ui/react": "^3.27.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
+    "@hookform/resolvers": "^5.2.2",
     "@prisma/client": "^6.16.2",
     "@stackframe/stack": "^2.8.40",
     "@tanstack/react-query-devtools": "^5.90.2",
