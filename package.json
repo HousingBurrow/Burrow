@@ -10,7 +10,8 @@
     "prisma": "prisma",
     "prisma:migrate:dev": "prisma migrate dev",
     "prisma:studio": "prisma studio",
-    "prisma:generate": "prisma generate"
+    "prisma:generate": "prisma generate",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@chakra-ui/icons": "^2.2.4",

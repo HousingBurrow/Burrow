@@ -36,6 +36,13 @@ enum ApartmentType {
   
 }
 
+enum Location {
+  Midtown
+  WestMidtown
+  HomePark
+  NorthAvenue
+}
+
 model User {
   id          Int     @id @default(autoincrement())
   email       String  @unique
@@ -53,6 +60,8 @@ model Listing {
   address                 String
   description             String
   property_type           PropertyType
+  Location                Location
+  distance_in_miles       Decimal
 
   price                   Decimal
   num_rooms_available     Int
@@ -60,6 +69,7 @@ model Listing {
   number_roommates        Int
   utilities_included      Boolean
   SqFt                    Int
+  imageUrl                String
 
   start_date              DateTime
   end_date                DateTime
@@ -92,5 +102,7 @@ model HouseDetails {
   num_bathrooms     Decimal
   num_rooms         Int
 }
+
+
 
 
