@@ -79,7 +79,7 @@ export const SearchBar: FC = () => {
 
      {/* Date Range */}
      <RangePicker
-       value={dates as any}
+       value={dates}
        onChange={(val) => setDates(val as [Dayjs, Dayjs])}
        style={{ borderRadius: 999 }}
      />
