@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Provider } from "@/components/ui/provider";
 import { StackProvider, StackTheme } from "@stackframe/stack";
-import { Header } from "@/components/header";
 import { Suspense } from "react";
+import { Header } from "@/components/header";
 import { stackServerApp } from "@/stack/server";
 import ClientProviders from "@/components/client-providers";
 
@@ -20,6 +20,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <StackTheme>
             <Provider>
               <ClientProviders>
+                <Suspense>
                 <div
                   style={{
                     minHeight: "100vh",
@@ -34,6 +35,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                     {children}
                   </div>
                 </div>
+                </Suspense>
               </ClientProviders>
             </Provider>
           </StackTheme>
