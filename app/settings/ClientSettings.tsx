@@ -66,7 +66,10 @@ export default function ClientSettings({
   const [formData, setFormData] = useState<SettingsState>(initial);
   const [saving, startTransition] = useTransition();
 
-  const handleInputChange = (key: keyof SettingsState, value: any) => {
+  const handleInputChange = <K extends keyof SettingsState>(
+    key: K,
+    value: SettingsState[K]
+  ) => {
     setFormData((prev) => ({ ...prev, [key]: value }));
   };
 
@@ -252,7 +255,7 @@ export default function ClientSettings({
                 background: "#fff",
                 boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
               }}
-            >
+            > 
               <Form layout="vertical">
                 <Form.Item label="Dark Mode" valuePropName="checked">
                   <Switch
