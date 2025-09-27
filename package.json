@@ -19,6 +19,7 @@
     "@stackframe/stack": "^2.8.40",
     "@tanstack/react-query": "^5.90.2",
     "@tanstack/react-query-devtools": "^5.90.2",
+    "@vercel/blob": "^2.0.0",
     "antd": "^5.27.4",
     "moment": "^2.30.1",
     "next": "15.5.4",

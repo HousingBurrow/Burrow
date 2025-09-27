@@ -20,10 +20,11 @@ export function Header() {
         borderBottom: '1px solid #f0f0f0',
       }}
     >
+      <Link href="/">
       <Title level={3} style={{ margin: 0 }}>
-        BURROW
-      </Title>
-
+          BURROW
+        </Title>
+      </Link>
       <Space>
         {isProfilePage ? (
           <Link href="/">
@@ -38,7 +39,9 @@ export function Header() {
         <Link href="/settings">
           <Button type="text">Settings</Button>
         </Link>
-
+        <Link href="/settings/">
+          <Button type="text">Settings</Button>
+        </Link>
         <Button type="text">Logout</Button>
       </Space>
     </Row>
