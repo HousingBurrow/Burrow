@@ -5,8 +5,8 @@ import { ActionResult } from '../utils/action-result';
 import { prisma } from '../../../lib/prisma';
 import { Action } from '@prisma/client/runtime/library';
 import { describe } from 'node:test';
-import { image } from 'framer-motion/client';
-import { DataListItemLabelProps } from '@chakra-ui/react';
+import { desc, image } from 'framer-motion/client';
+import { DataListItemLabelProps, DialogDescription } from '@chakra-ui/react';
 
 interface CreateListingsProp {
   distance: number,
@@ -34,7 +34,8 @@ interface CreateListingsProp {
 
 // keep your existing imports (but remove any unused ones to avoid build errors)
 
-interface UpdateListingProps {
+type UpdateListingProps = {
+  id: number;
   distance?: number;
   address?: string;
   description?: string;
@@ -52,54 +53,19 @@ interface UpdateListingProps {
   location?: Location;
   imageUrl?: string;
   listerId?: number;
-  updatedAt?: Date; // if your schema doesn't use @updatedAt
+  updatedAt?: Date;
 }
 
-type ListingUpdateArgs = Parameters<typeof prisma.listing.update>[0];
-type ListingUpdateInput = ListingUpdateArgs['data'];
-
-export async function updateListing(
-  id: number,
-  patch: UpdateListingProps
-): Promise<ActionResult<Listing>> {
+export async function updateListing({ id, distance, address, description, startDate, endDate, numRoomsAvailable, numberRoommates, totalRooms, title, price, utilitiesIncluded, sqFt, propertyType, location, imageUrl, updatedAt}: UpdateListingProps): ActionResult<Listing> {
   try {
-    // Build a typed update payload without using `any`
-    const data: ListingUpdateInput = {
-      ...(patch.distance !== undefined ? { distance_in_miles: patch.distance } : {}),
-      ...(patch.address !== undefined ? { address: patch.address } : {}),
-      ...(patch.description !== undefined ? { description: patch.description } : {}),
-      ...(patch.startDate !== undefined ? { start_date: patch.startDate } : {}),
-      ...(patch.endDate !== undefined ? { end_date: patch.endDate } : {}),
-      ...(patch.numRoomsAvailable !== undefined ? { num_rooms_available: patch.numRoomsAvailable } : {}),
-      ...(patch.numberRoommates !== undefined ? { number_roommates: patch.numberRoommates } : {}),
-      ...(patch.totalRooms !== undefined ? { total_rooms: patch.totalRooms } : {}),
-      ...(patch.title !== undefined ? { Title: patch.title } : {}),
-      ...(patch.price !== undefined ? { price: patch.price } : {}),
-      ...(patch.utilitiesIncluded !== undefined ? { utilities_included: patch.utilitiesIncluded } : {}),
-      ...(patch.sqFt !== undefined ? { SqFt: patch.sqFt } : {}),
-      ...(patch.propertyType !== undefined ? { property_type: patch.propertyType } : {}),
-      ...(patch.location !== undefined ? { Location: patch.location } : {}),
-      ...(patch.imageUrl !== undefined ? { imageUrl: patch.imageUrl } : {}),
-      ...(patch.listerId !== undefined ? { listerId: patch.listerId } : {}),
-      // If your schema does NOT use @updatedAt, set it here:
-      ...(patch.updatedAt !== undefined ? { updated_at: patch.updatedAt } : { updated_at: new Date() }),
-    };
-
-    // No-op guard
-    if (Object.keys(data).length === 0) {
-      return { isError: true, message: 'No fields to update' };
-    }
-
-    const listing = await prisma.listing.update({ where: { id }, data });
-    return { isError: false, data: listing };
-  } catch (e: unknown) {
-    if (typeof e === 'object' && e !== null && 'code' in e && (e as { code: string }).code === 'P2025') {
-      return { isError: true, message: 'Listing not found' };
-    }
-    const message = e instanceof Error ? e.message : 'Error updating listing';
-    return { isError: true, message };
+    const listing = await prisma.listing.update({ where: { id }, data: {distance_in_miles: distance, address: address, description: description, start_date: startDate, end_date: endDate, num_rooms_available: numRoomsAvailable, number_roommates: numberRoommates, total_rooms: totalRooms, Title: title, price: price, utilities_included: utilitiesIncluded, SqFt: sqFt, property_type: propertyType, Location: location, imageUrl: imageUrl, updated_at: updatedAt }} );
+    return { isError: false, data: listing};
+  } catch (e) {
+    console.log("Error when updating listing", e);
+    return { isError: true, message: (e as Error).message};
   }
 }
+
 
 
 export async function createListing({ distance, address, description, startDate, endDate, numRoomsAvailable, numberRoommates, totalRooms, title, price, utilitiesIncluded, sqFt, propertyType, location, imageUrl, listerId, createdAt, updatedAt }: CreateListingsProp): ActionResult<Listing> {
@@ -157,3 +123,22 @@ export async function deleteListing(id: number): ActionResult<Listing> {
     return {isError: true, message: (e as Error).message };
   }
 }
+
+
+export async function getAllListings(): ActionResult<Listing[]> {
+  try {
+    const listings = await prisma.listing.findMany({
+      orderBy: { created_at: 'desc'},
+      include: {
+        apartmentDetails: true,
+        houseDetails: true,
+        lister: true
+      }
+    });
+    return {isError: false, data: listings};
+  } catch (e) {
+    console.log("Error returning all listings", e);
+    return {isError: true, message: (e as Error).message };
+  }
+}
+
