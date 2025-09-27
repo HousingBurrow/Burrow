@@ -1,30 +1,38 @@
-"use client";
-
 import React, { FC } from "react";
 import { Card, Typography, Button } from "antd";
+import Image from "next/image";
 
 const { Text, Title } = Typography;
 
 export interface ListingCardProps {
-  id: number;
-  title: string;
-  location: string;
-  price: string;
-  image: string;
+  listing: {
+    title: string;
+    imageUrl: string;
+    location: string;
+    price: number;
+  };
   onViewDetails?: () => void;
 }
 
-const ListingCard: FC<ListingCardProps> = ({ title, location, price, image, onViewDetails }) => {
+const ListingCard: FC<ListingCardProps> = ({ listing, onViewDetails }) => {
+  const { title: title, imageUrl, location, price } = listing;
   return (
-    <Card hoverable cover={<img alt={title} src={image} />}>
+    <Card
+      hoverable
+      cover={<Image alt={title} src={imageUrl} width={"100"} height={100} />}
+    >
       <Title level={5}>{title}</Title>
       <Text type="secondary">{location}</Text>
       <br />
-      <Text strong>{price}</Text>
+      <Text strong>{`$${price.toString()}`}</Text>
       {onViewDetails && (
         <>
           <br />
-          <Button type="primary" style={{ marginTop: 8 }} onClick={onViewDetails}>
+          <Button
+            type="primary"
+            style={{ marginTop: 8 }}
+            onClick={onViewDetails}
+          >
             View Details
           </Button>
         </>
