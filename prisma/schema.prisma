@@ -14,6 +14,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+
 model User {
   id          Int     @id @default(autoincrement())
   email       String  @unique
@@ -21,4 +22,29 @@ model User {
   last_name   String
   gender      String
   age         Int
+  listings    Listing[]
+  @@index([last_name])
 }
+
+model Listing {
+  id                      Int  @id @default(autoincrement())
+  address                 String
+  description             String
+  start_date              DateTime
+  end_date                DateTime
+  num_rooms_available     Int
+  total_rooms             Int
+  price                   Decimal
+  Title                   String
+  SqFt                    Int
+  number_roommates        Int
+  utilities_included      Boolean
+  created_at              DateTime
+  updated_at              DateTime
+
+  listerId                Int
+  lister                  User  @relation(fields: [listerId], references: [id], onDelete: Cascade)
+  @@index([listerId])
+  @@index([start_date, end_date])
+}
+
