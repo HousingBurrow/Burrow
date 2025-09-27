@@ -5,6 +5,7 @@ import { prisma } from "../../lib/prisma";
 import { AppListing } from "../schemas";
 import { ActionResult } from "../utils/action-result";
 
+
 type CreateListingsProps = Omit<AppListing, "id">;
 type UpdateListingProps = Partial<AppListing>;
 
