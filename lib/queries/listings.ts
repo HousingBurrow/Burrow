@@ -1,6 +1,6 @@
 "use server";
 
-import { Listing } from "@prisma/client";
+import { Listing, Prisma, PropertyType, Location } from "@prisma/client";
 import { prisma } from "../../lib/prisma";
 import { AppListing } from "../schemas";
 import { ActionResult } from "../utils/action-result";
@@ -156,6 +156,121 @@ export async function deleteListing(id: number): ActionResult<Listing> {
     return { isError: false, data: listing };
   } catch (e) {
     console.log("Error deleting listing", e);
+    return { isError: true, message: (e as Error).message };
+  }
+}
+
+interface GetListingsProps {
+  encodedCursor?: string;
+  limit?: number;
+  filters?: {
+    minPrice?: number;
+    maxPrice?: number;
+    propertyType?: PropertyType;
+    location?: Location;
+  };
+}
+
+interface PaginatedListingsResult {
+  totalCount: number;
+  thisPageCount: number;
+  nextCursor: string | null;
+  data: Listing[];
+}
+
+interface CursorData {
+  date: string;
+  id: number;
+}
+
+function encodeCursor(cursor: CursorData): string {
+  return Buffer.from(JSON.stringify(cursor)).toString('base64');
+}
+
+function decodeCursor(encodedCursor: string): CursorData {
+  return JSON.parse(Buffer.from(encodedCursor, 'base64').toString());
+}
+
+export async function getAllListings({ 
+  encodedCursor, 
+  limit = 10, 
+  filters 
+}: GetListingsProps = {}): ActionResult<PaginatedListingsResult> {
+  try {
+    const cursor = encodedCursor ? decodeCursor(encodedCursor) : null;
+    
+    const whereClause: Prisma.ListingWhereInput = {};
+
+    // Handle price filters
+    if (filters?.minPrice || filters?.maxPrice) {
+      whereClause.price = {};
+      if (filters.minPrice) whereClause.price.gte = filters.minPrice;
+      if (filters.maxPrice) whereClause.price.lte = filters.maxPrice;
+    }
+
+    // Handle other filters
+    if (filters?.propertyType) {
+      whereClause.property_type = filters.propertyType;
+    }
+
+    if (filters?.location) {
+      whereClause.location = filters.location;
+    }
+
+
+    // Handle cursor for pagination
+    if (cursor) {
+      whereClause.OR = [
+        {
+          created_at: { lt: new Date(cursor.date) },
+        },
+        {
+          created_at: new Date(cursor.date),
+          id: { lt: cursor.id },
+        },
+      ];
+    }
+
+    const listingsCount = prisma.listing.count({
+      where: whereClause,
+    });
+
+    const listingPage = prisma.listing.findMany({
+      take: limit,
+      where: whereClause,
+      orderBy: [{ created_at: 'desc' }, { id: 'desc' }],
+      include: {
+        apartmentDetails: true,
+        houseDetails: true,
+        lister: true
+      }
+    });
+
+    const [totalCount, data] = await Promise.all([listingsCount, listingPage]);
+    
+    const thisPageCount = data.length;
+    const lastItem = data[thisPageCount - 1];
+    let nextCursor = null;
+    const hasMore = thisPageCount === limit && totalCount > thisPageCount;
+    
+    if (lastItem && hasMore) {
+      nextCursor = encodeCursor({
+        date: lastItem.created_at.toISOString(),
+        id: lastItem.id,
+      });
+    }
+
+    return {
+      isError: false,
+      data: {
+        totalCount,
+        thisPageCount,
+        nextCursor,
+        data,
+      },
+    };
+  } catch (e) {
+    console.error(e);
     return { isError: true, message: (e as Error).message };
   }
 }
