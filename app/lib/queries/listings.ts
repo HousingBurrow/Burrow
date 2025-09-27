@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { prisma } from '../lib/prisma';
+import { prisma } from '../prisma';
 
 
 // creating a listing with all fields inputted
