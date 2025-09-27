@@ -5,7 +5,6 @@ import { ActionResult } from '../utils/action-result';
 import { prisma } from '../../../lib/prisma';
 import { Action } from '@prisma/client/runtime/library';
 import { describe } from 'node:test';
-import { desc, image } from 'framer-motion/client';
 import { DataListItemLabelProps, DialogDescription } from '@chakra-ui/react';
 
 interface CreateListingsProp {
