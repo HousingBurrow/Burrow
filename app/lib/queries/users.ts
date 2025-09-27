@@ -1,8 +1,9 @@
 'use server';
 
-import { User } from '@/generated/prisma';
+import { User } from "@prisma/client";
 import { ActionResult } from '../utils/action-result';
 import { prisma } from '../../lib/prisma';
+import { a } from "framer-motion/client";
 
 interface CreateUserProps {
   email: string;
@@ -16,11 +17,11 @@ export async function createUser({ email, firstName, lastName, gender, age }: Cr
   try {
     const user = await prisma.user.create({
       data: { 
-        email,
-        firstName,
-        lastName,
-        gender,
-        age,
+        email: email,
+        first_name: firstName,
+        last_name: lastName,
+        gender: gender,
+        age: age,
       }
     });
 
@@ -75,7 +76,7 @@ export async function updateUser(
 // returns users given userID
 export async function getUserById(id: number): ActionResult<User> {
   try {
-    const user = await prisma.user.findUnique({ where: { id}});
+    const user = await prisma.user.findUniqueOrThrow({ where: { id}});
     return { isError: false, data: user};
   } catch (e) {
     console.log("Error getting user", e);
