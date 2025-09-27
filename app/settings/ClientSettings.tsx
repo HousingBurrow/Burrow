@@ -34,7 +34,12 @@ const { TabPane } = Tabs;
 const genders = ["Male", "Female", "Other", "Prefer not to say"] as const;
 type Gender = (typeof genders)[number];
 
-const locations = ["Midtown", "WestMidtown", "HomePark", "NorthAvenue"] as const;
+const locations = [
+  "Midtown",
+  "WestMidtown",
+  "HomePark",
+  "NorthAvenue",
+] as const;
 type DefaultLocation = (typeof locations)[number];
 
 type SettingsState = {
@@ -97,7 +102,7 @@ export default function ClientSettings({
       await signOut({ callbackUrl: "/" });
     }
   };
-  
+
   return (
     <div style={{ minHeight: "100vh", padding: 32 }}>
       <Card
@@ -142,7 +147,7 @@ export default function ClientSettings({
                   <div className="avatar-hover">
                     <Avatar
                       size={100}
-                      style={{ backgroundColor: "#1890ff", fontSize: 32 }}
+                      style={{ backgroundColor: "#6F826A", fontSize: 32 }}
                     >
                       {formData.firstName[0]?.toUpperCase() || "U"}
                       {formData.lastName[0]?.toUpperCase() || ""}
@@ -228,6 +233,23 @@ export default function ClientSettings({
                   />
                 </Form.Item>
               </Form>
+
+              <div style={{ textAlign: "right", marginTop: 32 }}>
+                <Space>
+                  <Button disabled={saving}>Cancel</Button>
+                  <Button
+                    type="primary"
+                    onClick={handleSave}
+                    loading={saving}
+                    style={{
+                      background: "#6F826A",
+                      border: "none",
+                    }}
+                  >
+                    Save Changes
+                  </Button>
+                </Space>
+              </div>
             </Card>
           </TabPane>
 
@@ -305,13 +327,13 @@ export default function ClientSettings({
               type="inner"
               title="Danger Zone"
               style={{
-                borderColor: "#ff4d4f",
+                borderColor: "#9A3F3F',",
                 borderWidth: 1,
                 borderStyle: "solid",
                 borderRadius: 16,
               }}
             >
-              <Text style={{ color: "#ff4d4f" }}>
+              <Text style={{ color: "#9A3F3F" }}>
                 Deleting your account is irreversible.
               </Text>
               <div style={{ textAlign: "right", marginTop: 16 }}>
@@ -327,23 +349,6 @@ export default function ClientSettings({
             </Card>
           </TabPane>
         </Tabs>
-
-        <div style={{ textAlign: "right", marginTop: 32 }}>
-          <Space>
-            <Button disabled={saving}>Cancel</Button>
-            <Button
-              type="primary"
-              onClick={handleSave}
-              loading={saving}
-              style={{
-                background: "linear-gradient(90deg, #1890ff, #40a9ff)",
-                border: "none",
-              }}
-            >
-              Save Changes
-            </Button>
-          </Space>
-        </div>
       </Card>
     </div>
   );
