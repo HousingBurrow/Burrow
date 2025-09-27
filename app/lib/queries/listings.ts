@@ -1,8 +1,8 @@
 'use server';
 
-import { PrismaClient, type Listing, type PropertyType, type Location } from '@prisma/client';
+import { PrismaClient, Listing, PropertyType, Location } from '@prisma/client';
 import { ActionResult } from '../utils/action-result';
-import { prisma } from '../../lib/prisma';
+import { prisma } from '../../../lib/prisma';
 import { Action } from '@prisma/client/runtime/library';
 import { describe } from 'node:test';
 import { image } from 'framer-motion/client';
