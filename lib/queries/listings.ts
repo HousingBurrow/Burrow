@@ -168,6 +168,9 @@ interface GetListingsProps {
     maxPrice?: number;
     propertyType?: PropertyType;
     location?: Location;
+    rooms?: number;
+    startDate?: Date;
+    endDate?: Date;
   };
 }
 
@@ -208,6 +211,19 @@ export async function getAllListings({
       if (filters.maxPrice) whereClause.price.lte = filters.maxPrice;
     }
 
+    // Handle rooms filter
+    if (filters?.rooms) {
+      whereClause.num_rooms_available = { gte: filters.rooms };
+    }
+
+    // Handle date range filter
+    if (filters?.startDate && filters?.endDate) {
+      whereClause.AND = [
+        { start_date: { lte: filters.endDate } },
+        { end_date: { gte: filters.startDate } }
+      ];
+    }
+
     // Handle other filters
     if (filters?.propertyType) {
       whereClause.property_type = filters.propertyType;
@@ -237,7 +253,9 @@ export async function getAllListings({
     const listingPage = prisma.listing.findMany({
       take: limit,
       where: whereClause,
-      orderBy: [{ created_at: "desc" }, { id: "desc" }],
+      orderBy: (filters?.minPrice || filters?.maxPrice) 
+        ? [{ price: "asc" }, { created_at: "desc" }, { id: "desc" }]
+        : [{ created_at: "desc" }, { id: "desc" }],
     });
 
     const [totalCount, data] = await Promise.all([listingsCount, listingPage]);

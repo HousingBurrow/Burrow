@@ -15,11 +15,11 @@ export function Header() {
     <Row
       style={{
         background: "#fff",
-        height: 64, // ✅ fixed header height
+        height: 64, 
         padding: "0 32px",
         display: "flex",
         justifyContent: "space-between",
-        alignItems: "center", // ✅ center content vertically
+        alignItems: "center", 
         borderBottom: "1px solid #f0f0f0",
         top: 0,
         zIndex: 1000,
@@ -32,7 +32,7 @@ export function Header() {
           display: "flex",
           alignItems: "center",
           gap: 8,
-          height: "100%", // ✅ keeps logo within header
+          height: "100%", 
         }}
       >
         <Image
