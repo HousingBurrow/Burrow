@@ -14,6 +14,28 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum PropertyType {
+  APARTMENT
+  HOUSE
+}
+
+enum RoomType {
+  SINGLE
+  DOUBLE
+}
+
+enum ApartmentType {
+  SixBySix
+  FiveByFive
+  FourByFour
+  ThreeByThree
+  TwoByTwo
+  Studio
+  
+  FiveByThree
+  FiveByFour
+  
+}
 
 model User {
   id          Int     @id @default(autoincrement())
@@ -28,23 +50,48 @@ model User {
 
 model Listing {
   id                      Int  @id @default(autoincrement())
+  Title                   String
   address                 String
   description             String
-  start_date              DateTime
-  end_date                DateTime
+  property_type           PropertyType
+
+  price                   Decimal
   num_rooms_available     Int
   total_rooms             Int
-  price                   Decimal
-  Title                   String
-  SqFt                    Int
   number_roommates        Int
   utilities_included      Boolean
+  SqFt                    Int
+
+  start_date              DateTime
+  end_date                DateTime
   created_at              DateTime
   updated_at              DateTime
+
+  apartmentDetails   ApartmentDetails?
+  houseDetails       HouseDetails?
 
   listerId                Int
   lister                  User  @relation(fields: [listerId], references: [id], onDelete: Cascade)
   @@index([listerId])
-  @@index([start_date, end_date])
+  @@index([property_type])
 }
+
+model ApartmentDetails {
+  id                Int      @id @default(autoincrement())
+  listingId         Int      @unique
+  listing           Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  room_type         RoomType
+  apartment_type    ApartmentType
+
+}
+
+model HouseDetails {
+  id                Int      @id @default(autoincrement())
+  listingId         Int      @unique
+  listing           Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  num_bathrooms     Decimal
+  num_rooms         Int
+}
+
 
