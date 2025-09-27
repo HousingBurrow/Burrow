@@ -48,7 +48,7 @@ export async function updateListing({
         property_type: propertyType,
         location: location,
         imageUrls,
-        listerId,
+        lister_id: listerId,
         created_at: createdAt,
         updated_at: updatedAt,
       },
@@ -99,7 +99,7 @@ export async function createListing({
         property_type: propertyType,
         location: location,
         imageUrls,
-        listerId,
+        lister_id: listerId,
         created_at: createdAt,
         updated_at: updatedAt,
       },
@@ -140,7 +140,7 @@ export async function getListingById(id: number): ActionResult<AppListing> {
       endDate: rawListing.end_date,
       createdAt: rawListing.created_at,
       updatedAt: rawListing.updated_at,
-      listerId: rawListing.listerId,
+      listerId: rawListing.lister_id,
     } as AppListing;
 
     return { isError: false, data: listing };
