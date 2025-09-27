@@ -73,23 +73,23 @@ model Listing {
 
   start_date DateTime
   end_date   DateTime
-  created_at DateTime
-  updated_at DateTime
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
   apartmentDetails ApartmentDetails?
   houseDetails     HouseDetails?
 
-  listerId Int
-  lister   User @relation(fields: [listerId], references: [id], onDelete: Cascade)
+  lister_id Int
+  lister    User @relation(fields: [lister_id], references: [id], onDelete: Cascade)
 
-  @@index([listerId])
+  @@index([lister_id])
   @@index([property_type])
 }
 
 model ApartmentDetails {
-  id        Int     @id @default(autoincrement())
-  listingId Int     @unique
-  listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  id         Int     @id @default(autoincrement())
+  listing_id Int     @unique
+  listing    Listing @relation(fields: [listing_id], references: [id], onDelete: Cascade)
 
   room_type      RoomType
   apartment_type ApartmentType
@@ -97,8 +97,8 @@ model ApartmentDetails {
 
 model HouseDetails {
   id            Int     @id @default(autoincrement())
-  listingId     Int     @unique
-  listing       Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  listing_id    Int     @unique
+  listing       Listing @relation(fields: [listing_id], references: [id], onDelete: Cascade)
   num_bathrooms Decimal
   num_rooms     Int
 }
