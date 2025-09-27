@@ -54,7 +54,7 @@ export default function AccountInformationPage({ user }: { user: ExtendedCurrent
         <Title level={3} style={{ textAlign: "center", marginBottom: "20px" }}>
           Account Information
         </Title>
-        <Form form={form} layout="vertical" onFinish={handleSubmit} initialValues={{ gender: "male", email: initialEmail }}>
+        <Form form={form} layout="vertical" onFinish={handleSubmit} initialValues={{ gender: "Not Selected Yet", email: initialEmail }}>
           <Form.Item label="Email" name="email">
             <Input disabled />
           </Form.Item>
