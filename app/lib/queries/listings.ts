@@ -1,6 +1,6 @@
 'use server';
 
-import { Location, type Listing, type PropertyType } from '@prisma/client';
+import { type Location, type Listing, type PropertyType } from '@prisma/client';
 import { ActionResult } from '../utils/action-result';
 import { prisma } from '../../lib/prisma';
 import { Action } from '@prisma/client/runtime/library';
