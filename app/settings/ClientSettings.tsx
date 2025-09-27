@@ -1,25 +1,49 @@
-'use client';
+"use client";
 
-import React, { useState, useTransition } from 'react';
+import React, { useState, useTransition } from "react";
 import {
-  Box, Container, Tabs, Field, Input, Select, Switch, Button, Avatar, Text, Heading,
-  Card, Alert, HStack, VStack, IconButton, createListCollection, Separator
-} from '@chakra-ui/react';
-import { FiUser, FiSettings, FiBell, FiShield, FiCamera, FiTrash2 } from 'react-icons/fi';
-import { updateUser } from '../../lib/queries/users';
+  Form,
+  Input,
+  Select,
+  Switch,
+  Button,
+  Avatar,
+  Typography,
+  Card,
+  Modal,
+  message,
+  Tabs,
+  Space,
+  Row,
+  Col,
+  Divider,
+} from "antd";
+import {
+  FiUser,
+  FiSettings,
+  FiBell,
+  FiShield,
+  FiCamera,
+  FiTrash2,
+} from "react-icons/fi";
+import { updateUser } from "../../lib/queries/users";
+import "./settings.css";
+import { deleteUser } from "@/lib/queries/users";
+import { signOut } from "next-auth/react";
 
-const genders = ['Male', 'Female', 'Other', 'Prefer not to say'] as const;
+const { Title, Text } = Typography;
+const { TabPane } = Tabs;
+
+const genders = ["Male", "Female", "Other", "Prefer not to say"] as const;
 type Gender = (typeof genders)[number];
 
-const locations = ['Midtown', 'WestMidtown', 'HomePark', 'NorthAvenue'] as const;
+const locations = [
+  "Midtown",
+  "WestMidtown",
+  "HomePark",
+  "NorthAvenue",
+] as const;
 type DefaultLocation = (typeof locations)[number];
-
-const genderCollection = createListCollection({
-  items: genders.map(x => ({ label: x, value: x }))
-});
-const locationCollection = createListCollection({
-  items: locations.map(x => ({ label: x, value: x }))
-});
 
 type SettingsState = {
   firstName: string;
@@ -41,32 +65,12 @@ export default function ClientSettings({
 }) {
   const [formData, setFormData] = useState<SettingsState>(initial);
   const [saving, startTransition] = useTransition();
-  const [error, setError] = useState<string | null>(null);
-  const [saved, setSaved] = useState(false);
 
-  const pageBg = 'gray.50';
-  const cardBg = 'white';
-  const border  = 'gray.200';
-  const muted   = 'gray.600';
-  const strong  = 'gray.800';
-
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value, type } = e.target;
-    const checked = (e.target as HTMLInputElement).checked;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : (name === 'age' ? Number(value) : value),
-    }) as SettingsState);
-  };
-
-  const handleSwitchChange = (name: keyof SettingsState) => (details: { checked: boolean }) => {
-    setFormData(prev => ({ ...prev, [name]: details.checked }));
+  const handleInputChange = (key: keyof SettingsState, value: any) => {
+    setFormData((prev) => ({ ...prev, [key]: value }));
   };
 
   const handleSave = () => {
-    setError(null);
-    setSaved(false);
     startTransition(async () => {
       const res = await updateUser({
         id: userId,
@@ -76,257 +80,289 @@ export default function ClientSettings({
         age: formData.age,
         gender: formData.gender,
       });
-      if (res.isError) setError(res.message || 'An error occurred');
-      else setSaved(true);
+
+      if (res.isError) {
+        message.error(res.message || "Failed to save changes");
+      } else {
+        message.success("Settings saved successfully");
+      }
     });
   };
 
+  const handleDelete = () => {
+    console.log("Delete account clicked");
+  };
+
   return (
-    <Box bg={pageBg} minH="100vh" py={{ base: 6, md: 10 }}>
-      <Container maxW="4xl" px={{ base: 4, md: 6 }}>
-        <VStack align="stretch" gap={6}>
-          <Heading size="lg" color={strong}>Settings</Heading>
+    <div style={{ minHeight: "100vh", padding: 32, background: "#f0f2f5" }}>
+      <Card
+        style={{
+          maxWidth: 900,
+          margin: "0 auto",
+          borderRadius: 24,
+          padding: 32,
+          boxShadow: "0 8px 24px rgba(0,0,0,0.08)",
+          background: "linear-gradient(180deg, #ffffff 0%, #fafafa 100%)",
+        }}
+      >
+        <Title level={2} style={{ marginBottom: 32, textAlign: "center" }}>
+          Account Settings
+        </Title>
 
-          {error && (
-            <Alert.Root status="error" borderRadius="lg">
-              <Alert.Indicator />
-              <Box>
-                <Alert.Title>Couldn’t save changes</Alert.Title>
-                <Alert.Description>{error}</Alert.Description>
-              </Box>
-            </Alert.Root>
-          )}
-
-          {saved && !error && (
-            <Alert.Root status="success" borderRadius="lg">
-              <Alert.Indicator />
-              <Box>
-                <Alert.Title>Saved</Alert.Title>
-                <Alert.Description>Your settings have been updated.</Alert.Description>
-              </Box>
-            </Alert.Root>
-          )}
-
-          <Card.Root bg={cardBg} borderWidth="1px" borderColor={border} shadow="sm" rounded="2xl" overflow="hidden">
-            <Tabs.Root defaultValue="profile" variant="line" colorScheme="gray">
-              <Tabs.List px={{ base: 4, md: 6 }} py={2} borderBottomWidth="1px" borderColor={border}>
-                <HStack gap={2} wrap="wrap">
-                  <Tabs.Trigger value="profile"><HStack gap={2}><FiUser /><Text>Profile</Text></HStack></Tabs.Trigger>
-                  <Tabs.Trigger value="preferences"><HStack gap={2}><FiSettings /><Text>Preferences</Text></HStack></Tabs.Trigger>
-                  <Tabs.Trigger value="notifications"><HStack gap={2}><FiBell /><Text>Notifications</Text></HStack></Tabs.Trigger>
-                  <Tabs.Trigger value="privacy"><HStack gap={2}><FiShield /><Text>Privacy</Text></HStack></Tabs.Trigger>
-                </HStack>
-              </Tabs.List>
-
-              {/* PROFILE */}
-              <Tabs.Content value="profile">
-                <VStack gap={8} align="stretch" px={{ base: 4, md: 10 }} py={{ base: 6, md: 8 }}>
-                  {/* Profile picture */}
-                  <HStack gap={5} align="center">
-                    <Box pos="relative">
-                      <Avatar.Root size="2xl" bg="blue.500">
-                        <Avatar.Fallback fontSize="2xl" fontWeight="bold">
-                          {(formData.firstName[0] || 'U').toUpperCase()}
-                          {(formData.lastName[0] || '').toUpperCase()}
-                        </Avatar.Fallback>
-                      </Avatar.Root>
-                      <IconButton
-                        aria-label="Upload photo"
-                        size="sm"
-                        colorScheme="blue"
-                        variant="solid"
-                        rounded="full"
-                        pos="absolute"
-                        bottom={0}
-                        right={0}
-                        shadow="md"
-                      >
-                        <FiCamera />
-                      </IconButton>
-                    </Box>
-                    <VStack align="start" gap={1}>
-                      <Text fontWeight="medium" color={strong}>Upload a new profile picture</Text>
-                      <Text fontSize="sm" color={muted}>JPG, PNG or GIF. Max size 2MB.</Text>
-                    </VStack>
-                  </HStack>
-
-                  <Separator borderColor={border} />
-
-                  {/* Personal info */}
-                  <VStack align="stretch" gap={6}>
-                    <Text fontSize="md" fontWeight="semibold" color={strong}>Personal Information</Text>
-
-                    <HStack gap={4} align="start">
-                      <Field.Root flex="1">
-                        <Field.Label color={muted}>First Name</Field.Label>
-                        <Input
-                          name="firstName"
-                          value={formData.firstName}
-                          onChange={handleInputChange}
-                          bg={cardBg}
-                          borderColor={border}
-                          _hover={{ borderColor: border }}
-                          _focus={{ borderColor: 'blue.500', boxShadow: '0 0 0 1px var(--chakra-colors-blue-500)' }}
-                        />
-                      </Field.Root>
-                      <Field.Root flex="1">
-                        <Field.Label color={muted}>Last Name</Field.Label>
-                        <Input
-                          name="lastName"
-                          value={formData.lastName}
-                          onChange={handleInputChange}
-                          bg={cardBg}
-                          borderColor={border}
-                          _hover={{ borderColor: border }}
-                          _focus={{ borderColor: 'blue.500', boxShadow: '0 0 0 1px var(--chakra-colors-blue-500)' }}
-                        />
-                      </Field.Root>
-                    </HStack>
-
-                    <HStack gap={4} align="start">
-                      <Field.Root flex="2">
-                        <Field.Label color={muted}>Email Address</Field.Label>
-                        <Input
-                          type="email"
-                          name="email"
-                          value={formData.email}
-                          onChange={handleInputChange}
-                          bg={cardBg}
-                          borderColor={border}
-                          _hover={{ borderColor: border }}
-                          _focus={{ borderColor: 'blue.500', boxShadow: '0 0 0 1px var(--chakra-colors-blue-500)' }}
-                        />
-                      </Field.Root>
-                      <Field.Root flex="1">
-                        <Field.Label color={muted}>Age</Field.Label>
-                        <Input
-                          type="number"
-                          name="age"
-                          value={formData.age}
-                          onChange={handleInputChange}
-                          bg={cardBg}
-                          borderColor={border}
-                          _hover={{ borderColor: border }}
-                          _focus={{ borderColor: 'blue.500', boxShadow: '0 0 0 1px var(--chakra-colors-blue-500)' }}
-                        />
-                      </Field.Root>
-                    </HStack>
-
-                    <Field.Root maxW="sm">
-                      <Field.Label color={muted}>Gender</Field.Label>
-                      <Select.Root
-                        collection={genderCollection}
-                        multiple={false as const}
-                        value={[formData.gender]}
-                        onValueChange={(d) => setFormData(p => ({ ...p, gender: d.value[0] as Gender }))}
-                      >
-                        <Select.Trigger bg={cardBg} borderColor={border} />
-                        <Select.Positioner>
-                          <Select.Content>
-                            {genderCollection.items.map((item) => (
-                              <Select.Item key={item.value} item={item}>
-                                <Select.ItemText>{item.label}</Select.ItemText>
-                                <Select.ItemIndicator>✓</Select.ItemIndicator>
-                              </Select.Item>
-                            ))}
-                          </Select.Content>
-                        </Select.Positioner>
-                      </Select.Root>
-                    </Field.Root>
-                  </VStack>
-                </VStack>
-              </Tabs.Content>
-
-              {/* PREFERENCES */}
-              <Tabs.Content value="preferences">
-                <VStack gap={8} align="stretch" px={{ base: 4, md: 10 }} py={{ base: 6, md: 8 }}>
-                  <Text fontSize="md" fontWeight="semibold" color={strong}>App Preferences</Text>
-
-                  <HStack justify="space-between" align="center" p={4} bg="gray.50" rounded="lg" borderWidth="1px" borderColor={border}>
-                    <VStack align="start" gap={1}>
-                      <Text fontWeight="medium" color={strong}>Dark Mode</Text>
-                      <Text fontSize="sm" color={muted}>Toggle dark theme</Text>
-                    </VStack>
-                    <Switch.Root checked={formData.darkMode} onCheckedChange={handleSwitchChange('darkMode')}>
-                      <Switch.Control><Switch.Thumb /></Switch.Control>
-                    </Switch.Root>
-                  </HStack>
-
-                  <Field.Root maxW="sm">
-                    <Field.Label color={muted}>Default Search Location</Field.Label>
-                    <Select.Root
-                      collection={locationCollection}
-                      multiple={false as const}
-                      value={[formData.defaultLocation]}
-                      onValueChange={(d) => setFormData(p => ({ ...p, defaultLocation: d.value[0] as DefaultLocation }))}
+        <Tabs
+          defaultActiveKey="profile"
+          type="card"
+          tabBarStyle={{ marginBottom: 32, fontWeight: 600 }}
+          centered
+        >
+          {/* PROFILE */}
+          <TabPane
+            tab={
+              <Space>
+                <FiUser />
+                Profile
+              </Space>
+            }
+            key="profile"
+          >
+            <Card
+              style={{
+                borderRadius: 16,
+                padding: 24,
+                marginBottom: 24,
+                background: "#fff",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+              }}
+            >
+              <Row gutter={24} align="middle">
+                <Col>
+                  <div className="avatar-hover">
+                    <Avatar
+                      size={100}
+                      style={{ backgroundColor: "#1890ff", fontSize: 32 }}
                     >
-                      <Select.Trigger bg={cardBg} borderColor={border} />
-                      <Select.Positioner>
-                        <Select.Content>
-                          {locationCollection.items.map((item) => (
-                            <Select.Item key={item.value} item={item}>
-                              <Select.ItemText>{item.label}</Select.ItemText>
-                              <Select.ItemIndicator>✓</Select.ItemIndicator>
-                            </Select.Item>
-                          ))}
-                        </Select.Content>
-                      </Select.Positioner>
-                    </Select.Root>
-                  </Field.Root>
-                </VStack>
-              </Tabs.Content>
+                      {formData.firstName[0]?.toUpperCase() || "U"}
+                      {formData.lastName[0]?.toUpperCase() || ""}
+                    </Avatar>
+                    <div className="avatar-overlay">
+                      <FiCamera size={24} color="#fff" />
+                    </div>
+                  </div>
+                </Col>
+                <Col flex="auto">
+                  <Text style={{ fontSize: 14, color: "#595959" }}>
+                    Upload a new profile picture. JPG, PNG, or GIF. Max 2MB.
+                  </Text>
+                </Col>
+              </Row>
+            </Card>
 
-              {/* NOTIFICATIONS */}
-              <Tabs.Content value="notifications">
-                <VStack gap={6} align="stretch" px={{ base: 4, md: 10 }} py={{ base: 6, md: 8 }}>
-                  <Text fontSize="md" fontWeight="semibold" color={strong}>Notifications</Text>
-                  <HStack justify="space-between" align="center" p={4} bg="gray.50" rounded="lg" borderWidth="1px" borderColor={border}>
-                    <VStack align="start" gap={1}>
-                      <Text fontWeight="medium" color={strong}>Email Notifications</Text>
-                      <Text fontSize="sm" color={muted}>Get updates about new listings</Text>
-                    </VStack>
-                    <Switch.Root checked={formData.notifications} onCheckedChange={handleSwitchChange('notifications')}>
-                      <Switch.Control><Switch.Thumb /></Switch.Control>
-                    </Switch.Root>
-                  </HStack>
-                </VStack>
-              </Tabs.Content>
+            <Card
+              style={{
+                borderRadius: 16,
+                padding: 24,
+                background: "#fff",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+              }}
+            >
+              <Form layout="vertical">
+                <Row gutter={16}>
+                  <Col span={12}>
+                    <Form.Item label="First Name">
+                      <Input
+                        value={formData.firstName}
+                        onChange={(e) =>
+                          handleInputChange("firstName", e.target.value)
+                        }
+                        placeholder="Enter first name"
+                        size="large"
+                      />
+                    </Form.Item>
+                  </Col>
+                  <Col span={12}>
+                    <Form.Item label="Last Name">
+                      <Input
+                        value={formData.lastName}
+                        onChange={(e) =>
+                          handleInputChange("lastName", e.target.value)
+                        }
+                        placeholder="Enter last name"
+                        size="large"
+                      />
+                    </Form.Item>
+                  </Col>
+                </Row>
 
-              {/* PRIVACY */}
-              <Tabs.Content value="privacy">
-                <VStack gap={6} align="stretch" px={{ base: 4, md: 10 }} py={{ base: 6, md: 8 }}>
-                  <Text fontSize="md" fontWeight="semibold" color={strong}>Privacy & Security</Text>
-                  <Alert.Root status="error" rounded="lg" borderWidth="1px" borderColor={border}>
-                    <Alert.Indicator />
-                    <VStack align="start" gap={3}>
-                      <Box>
-                        <Alert.Title>Danger Zone</Alert.Title>
-                        <Alert.Description fontSize="sm">
-                          Once you delete your account, there is no going back.
-                        </Alert.Description>
-                      </Box>
-                      <Button colorScheme="red" size="sm">
-                    <HStack gap={2}>
-                      <FiTrash2 />
-                      <span>Delete Account</span>
-                    </HStack>
-                  </Button>
-                    </VStack>
-                  </Alert.Root>
-                </VStack>
-              </Tabs.Content>
-            </Tabs.Root>
+                <Row gutter={16}>
+                  <Col span={16}>
+                    <Form.Item label="Email">
+                      <Input
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) =>
+                          handleInputChange("email", e.target.value)
+                        }
+                        placeholder="Enter email"
+                        size="large"
+                      />
+                    </Form.Item>
+                  </Col>
+                  <Col span={8}>
+                    <Form.Item label="Age">
+                      <Input
+                        type="number"
+                        value={formData.age}
+                        onChange={(e) =>
+                          handleInputChange("age", Number(e.target.value))
+                        }
+                        placeholder="Age"
+                        size="large"
+                      />
+                    </Form.Item>
+                  </Col>
+                </Row>
 
-            {/* Footer */}
-            <HStack justify="flex-end" gap={3} px={{ base: 4, md: 10 }} py={{ base: 4, md: 6 }} borderTopWidth="1px" borderColor={border} bg="gray.50">
-              <Button variant="ghost" disabled={saving}>Cancel</Button>
-              <Button colorScheme="blue" onClick={handleSave} loading={saving} px={6}>
-                Save Changes
-              </Button>
-            </HStack>
-          </Card.Root>
-        </VStack>
-      </Container>
-    </Box>
+                <Form.Item label="Gender">
+                  <Select
+                    value={formData.gender}
+                    onChange={(val) => handleInputChange("gender", val)}
+                    options={genders.map((g) => ({ label: g, value: g }))}
+                    placeholder="Select gender"
+                    size="large"
+                  />
+                </Form.Item>
+              </Form>
+            </Card>
+          </TabPane>
+
+          {/* PREFERENCES */}
+          <TabPane
+            tab={
+              <Space>
+                <FiSettings />
+                Preferences
+              </Space>
+            }
+            key="preferences"
+          >
+            <Card
+              style={{
+                borderRadius: 16,
+                padding: 24,
+                background: "#fff",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+              }}
+            >
+              <Form layout="vertical">
+                <Form.Item label="Dark Mode" valuePropName="checked">
+                  <Switch
+                    checked={formData.darkMode}
+                    onChange={(checked) =>
+                      handleInputChange("darkMode", checked)
+                    }
+                    size="small"
+                  />
+                </Form.Item>
+
+                <Form.Item label="Default Search Location">
+                  <Select
+                    value={formData.defaultLocation}
+                    onChange={(val) =>
+                      handleInputChange("defaultLocation", val)
+                    }
+                    options={locations.map((l) => ({ label: l, value: l }))}
+                    placeholder="Select location"
+                    size="large"
+                  />
+                </Form.Item>
+              </Form>
+            </Card>
+          </TabPane>
+
+          {/* NOTIFICATIONS */}
+          <TabPane
+            tab={
+              <Space>
+                <FiBell />
+                Notifications
+              </Space>
+            }
+            key="notifications"
+          >
+            <Card
+              style={{
+                borderRadius: 16,
+                padding: 24,
+                background: "#fff",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+              }}
+            >
+              <Form.Item label="Email Notifications" valuePropName="checked">
+                <Switch
+                  checked={formData.notifications}
+                  onChange={(checked) =>
+                    handleInputChange("notifications", checked)
+                  }
+                  size="small"
+                />
+              </Form.Item>
+            </Card>
+          </TabPane>
+
+          {/* PRIVACY */}
+          <TabPane
+            tab={
+              <Space>
+                <FiShield />
+                Privacy
+              </Space>
+            }
+            key="privacy"
+          >
+            <Card
+              type="inner"
+              title="Danger Zone"
+              style={{
+                borderColor: "#ff4d4f",
+                borderWidth: 1,
+                borderStyle: "solid",
+                borderRadius: 16,
+              }}
+            >
+              <Text style={{ color: "#ff4d4f" }}>
+                Deleting your account is irreversible.
+              </Text>
+              <div style={{ textAlign: "right", marginTop: 16 }}>
+                <Button
+                  type="primary"
+                  danger
+                  icon={<FiTrash2 />}
+                  onClick={() => handleDelete()}
+                >
+                  Delete Account
+                </Button>
+              </div>
+            </Card>
+          </TabPane>
+        </Tabs>
+
+        <div style={{ textAlign: "right", marginTop: 32 }}>
+          <Space>
+            <Button disabled={saving}>Cancel</Button>
+            <Button
+              type="primary"
+              onClick={handleSave}
+              loading={saving}
+              style={{
+                background: "linear-gradient(90deg, #1890ff, #40a9ff)",
+                border: "none",
+              }}
+            >
+              Save Changes
+            </Button>
+          </Space>
+        </div>
+      </Card>
+    </div>
   );
 }
