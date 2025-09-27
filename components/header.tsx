@@ -22,6 +22,8 @@ export function Header() {
         justifyContent: "space-between",
         alignItems: "center", // ✅ center content vertically
         borderBottom: "1px solid #f0f0f0",
+        top: 0,
+        zIndex: 1000
       }}
     >
       {/* Logo area */}

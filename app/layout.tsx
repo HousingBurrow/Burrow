@@ -12,7 +12,11 @@ export const metadata: Metadata = {
   description: "Your one stop shop for everything subleasing",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
@@ -21,20 +25,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <Provider>
               <ClientProviders>
                 <Suspense>
-                <div
-                  style={{
-                    minHeight: "100vh",
-                    minWidth: "100vw",
-                    height: "100vh",
-                    width: "100vw",
-                  }}
-                >
-                  <Header />
-
-                  <div style={{ height: "100%", width: "100%" }}>
-                    {children}
+                  <div
+                    style={{
+                      width: "100%",
+                      minHeight: "100vh",
+                    }}
+                  >
+                    <Header />
+                    <div style={{ width: "100%" }}>{children}</div>
                   </div>
-                </div>
                 </Suspense>
               </ClientProviders>
             </Provider>
