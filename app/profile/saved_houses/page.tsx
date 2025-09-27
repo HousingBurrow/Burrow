@@ -1,63 +1,78 @@
-'use client'
+"use client";
 
-import { Typography, Row, Col, Card, Button } from 'antd'
+import ListingCard from "@/components/home/listing-card";
+import ListingModal from "@/components/home/listing-modal";
+import { getListingById } from "@/lib/queries/listings";
+import { AppListing } from "@/lib/schemas";
+import { useQuery } from "@tanstack/react-query";
+import { Col, Row, Typography, Spin } from "antd";
+import { useState } from "react";
 
-const { Title, Text } = Typography
+const { Title, Text } = Typography;
 
 export default function MyListingsPage() {
-  // Replace this with real data later
-  const listings = [
-    {
-      id: 1,
-      title: 'Sunny Apartment near Campus',
-      location: 'Atlanta, GA',
-      price: '$700/month',
-      image: 'https://via.placeholder.com/600x400?text=Listing+1',
+  const { isLoading, data, isError } = useQuery({
+    queryKey: ["listing", 1],
+    queryFn: async () => {
+      const response = await getListingById(1);
+      if (response.isError) {
+        return null;
+      }
+      return response.data;
     },
-    {
-      id: 2,
-      title: 'Shared House with Garden',
-      location: 'Atlanta, GA',
-      price: '$450/month',
-      image: 'https://via.placeholder.com/600x400?text=Listing+2',
-    },
-  ]
+  });
+
+  const listings = data ? [data] : [];
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedListing, setSelectedListing] = useState<AppListing | null>(
+    null
+  );
+
+  const showModal = (listing: AppListing) => {
+    setSelectedListing(listing);
+    setIsModalOpen(true);
+  };
+
+  const handleOk = () => setIsModalOpen(false);
+  const handleCancel = () => setIsModalOpen(false);
+
+  if (isLoading) return <Spin tip="Loading listings..." />;
+
+  if (isError) return <Text type="danger">Failed to load listings.</Text>;
 
   return (
     <div style={{ padding: 24 }}>
-      <Title level={3}>My Listings</Title>
+      <Title level={3}>My Saved Listings</Title>
 
       {listings.length === 0 ? (
-        <Text type="secondary">You have not created any listings yet.</Text>
+        <Text type="secondary">You have not saved any listings yet.</Text>
       ) : (
-        <Row gutter={[16, 16]}>
-          {listings.map((l) => (
-            <Col key={l.id} xs={24} sm={12} lg={8}>
-              <Card
-                hoverable
-                cover={
-                  <img
-                    src={l.image}
-                    alt={l.title}
-                    style={{ height: 180, width: '100%', objectFit: 'cover' }}
-                  />
-                }
-              >
-                <Title level={5} style={{ marginBottom: 4 }}>
-                  {l.title}
-                </Title>
-                <Text type="secondary">{l.location}</Text>
-                <div style={{ marginTop: 8 }}>
-                  <Text strong>{l.price}</Text>
-                </div>
-                <Button type="primary" block style={{ marginTop: 12 }}>
-                  View Details
-                </Button>
-              </Card>
+        <Row gutter={[16, 16]} style={{ padding: "32px 0" }}>
+          {listings.map((listing) => (
+            <Col key={listing.id} xs={24} sm={12} md={8} lg={6}>
+              <ListingCard
+                listing={{
+                  title: listing.title,
+                  location: listing.location,
+                  price: Number(listing.price),
+                  imageUrl: listing.imageUrls[0],
+                }}
+                onViewDetails={() => showModal(listing)}
+              />
             </Col>
           ))}
         </Row>
       )}
+
+      {selectedListing && (
+        <ListingModal
+          isOpen={isModalOpen}
+          handleCancel={handleCancel}
+          handleOk={handleOk}
+          selectedListing={selectedListing}
+        />
+      )}
     </div>
-  )
+  );
 }
