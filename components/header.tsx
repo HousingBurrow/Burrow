@@ -1,10 +1,10 @@
 "use client";
 
-import { Row, Space, Button } from "antd";
-import Title from "antd/es/typography/Title";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useUser, useStackApp } from "@stackframe/stack";
+import { useUser, useStackApp } from '@stackframe/stack';
+import { Row, Space, Button } from 'antd'
+import Title from 'antd/es/typography/Title'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 
 export function Header() {
   const pathname = usePathname();

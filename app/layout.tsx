@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Provider } from "@/components/ui/provider";
 import { StackProvider, StackTheme } from "@stackframe/stack";
-import { stackClientApp } from "@/stack/client";
 import { Header } from "@/components/header";
 import { Suspense } from "react";
+import { stackServerApp } from "@/stack/server";
+import ClientProviders from "@/components/client-providers";
 
 export const metadata: Metadata = {
   title: "Burrow",
@@ -15,23 +16,25 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
-        <StackProvider app={stackClientApp}>
+        <StackProvider app={stackServerApp}>
           <StackTheme>
             <Provider>
-              <div
-                style={{
-                  minHeight: "100vh",
-                  minWidth: "100vw",
-                  height: "100vh",
-                  width: "100vw",
-                }}
-              >
-                <Suspense fallback={<div style={{ padding: "1rem" }}>Loading...</div>}>
+              <ClientProviders>
+                <div
+                  style={{
+                    minHeight: "100vh",
+                    minWidth: "100vw",
+                    height: "100vh",
+                    width: "100vw",
+                  }}
+                >
                   <Header />
-                </Suspense>
 
-                <div style={{ height: "100%", width: "100%" }}>{children}</div>
-              </div>
+                  <div style={{ height: "100%", width: "100%" }}>
+                    {children}
+                  </div>
+                </div>
+              </ClientProviders>
             </Provider>
           </StackTheme>
         </StackProvider>

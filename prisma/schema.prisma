@@ -30,10 +30,9 @@ enum ApartmentType {
   ThreeByThree
   TwoByTwo
   Studio
-  
+
   FiveByThree
   FiveByFour
-  
 }
 
 enum Location {
@@ -44,65 +43,62 @@ enum Location {
 }
 
 model User {
-  id          Int     @id @default(autoincrement())
-  email       String  @unique
-  first_name  String
-  last_name   String
-  gender      String
-  age         Int
-  listings    Listing[]
+  id         Int       @id @default(autoincrement())
+  email      String    @unique
+  first_name String
+  last_name  String
+  gender     String
+  age        Int
+  listings   Listing[]
+
   @@index([last_name])
 }
 
 model Listing {
-  id                      Int  @id @default(autoincrement())
-  Title                   String
-  address                 String
-  description             String
-  property_type           PropertyType
-  Location                Location
-  distance_in_miles       Decimal
+  id                Int          @id @default(autoincrement())
+  title             String
+  address           String
+  description       String
+  property_type     PropertyType
+  location          Location
+  distance_in_miles Decimal
 
-  price                   Decimal
-  num_rooms_available     Int
-  total_rooms             Int
-  number_roommates        Int
-  utilities_included      Boolean
-  SqFt                    Int
-  imageUrl                String
+  price               Decimal
+  num_rooms_available Int
+  total_rooms         Int
+  number_roommates    Int
+  utilities_included  Boolean
+  sqft                Int
+  imageUrls           String[]
 
-  start_date              DateTime
-  end_date                DateTime
-  created_at              DateTime
-  updated_at              DateTime
+  start_date DateTime
+  end_date   DateTime
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
-  apartmentDetails   ApartmentDetails?
-  houseDetails       HouseDetails?
+  apartmentDetails ApartmentDetails?
+  houseDetails     HouseDetails?
 
-  listerId                Int
-  lister                  User  @relation(fields: [listerId], references: [id], onDelete: Cascade)
-  @@index([listerId])
+  lister_id Int
+  lister    User @relation(fields: [lister_id], references: [id], onDelete: Cascade)
+
+  @@index([lister_id])
   @@index([property_type])
 }
 
 model ApartmentDetails {
-  id                Int      @id @default(autoincrement())
-  listingId         Int      @unique
-  listing           Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  id         Int     @id @default(autoincrement())
+  listing_id Int     @unique
+  listing    Listing @relation(fields: [listing_id], references: [id], onDelete: Cascade)
 
-  room_type         RoomType
-  apartment_type    ApartmentType
-
+  room_type      RoomType
+  apartment_type ApartmentType
 }
 
 model HouseDetails {
-  id                Int      @id @default(autoincrement())
-  listingId         Int      @unique
-  listing           Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
-  num_bathrooms     Decimal
-  num_rooms         Int
+  id            Int     @id @default(autoincrement())
+  listing_id    Int     @unique
+  listing       Listing @relation(fields: [listing_id], references: [id], onDelete: Cascade)
+  num_bathrooms Decimal
+  num_rooms     Int
 }
-
-
-
-
