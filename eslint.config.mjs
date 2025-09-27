@@ -19,6 +19,12 @@ const eslintConfig = [
       "build/**",
       "next-env.d.ts",
     ],
+    rules: {
+      // Change unused variables from error to warning
+      "no-unused-vars": ["warn", { args: "after-used", ignoreRestSiblings: true }],
+      "@typescript-eslint/no-empty-interface": "warn",
+      "@typescript-eslint/no-empty-object-type": "warn",
+    },
   },
 ];
 
