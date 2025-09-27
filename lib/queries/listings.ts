@@ -5,7 +5,6 @@ import { prisma } from "../../lib/prisma";
 import { AppListing } from "../schemas";
 import { ActionResult } from "../utils/action-result";
 
-
 type CreateListingsProps = Omit<AppListing, "id">;
 type UpdateListingProps = Partial<AppListing>;
 
@@ -176,7 +175,7 @@ interface PaginatedListingsResult {
   totalCount: number;
   thisPageCount: number;
   nextCursor: string | null;
-  data: Listing[];
+  data: AppListing[];
 }
 
 interface CursorData {
@@ -185,21 +184,21 @@ interface CursorData {
 }
 
 function encodeCursor(cursor: CursorData): string {
-  return Buffer.from(JSON.stringify(cursor)).toString('base64');
+  return Buffer.from(JSON.stringify(cursor)).toString("base64");
 }
 
 function decodeCursor(encodedCursor: string): CursorData {
-  return JSON.parse(Buffer.from(encodedCursor, 'base64').toString());
+  return JSON.parse(Buffer.from(encodedCursor, "base64").toString());
 }
 
-export async function getAllListings({ 
-  encodedCursor, 
-  limit = 10, 
-  filters 
+export async function getAllListings({
+  encodedCursor,
+  limit = 10,
+  filters,
 }: GetListingsProps = {}): ActionResult<PaginatedListingsResult> {
   try {
     const cursor = encodedCursor ? decodeCursor(encodedCursor) : null;
-    
+
     const whereClause: Prisma.ListingWhereInput = {};
 
     // Handle price filters
@@ -217,7 +216,6 @@ export async function getAllListings({
     if (filters?.location) {
       whereClause.location = filters.location;
     }
-
 
     // Handle cursor for pagination
     if (cursor) {
@@ -239,21 +237,16 @@ export async function getAllListings({
     const listingPage = prisma.listing.findMany({
       take: limit,
       where: whereClause,
-      orderBy: [{ created_at: 'desc' }, { id: 'desc' }],
-      include: {
-        apartmentDetails: true,
-        houseDetails: true,
-        lister: true
-      }
+      orderBy: [{ created_at: "desc" }, { id: "desc" }],
     });
 
     const [totalCount, data] = await Promise.all([listingsCount, listingPage]);
-    
+
     const thisPageCount = data.length;
     const lastItem = data[thisPageCount - 1];
     let nextCursor = null;
     const hasMore = thisPageCount === limit && totalCount > thisPageCount;
-    
+
     if (lastItem && hasMore) {
       nextCursor = encodeCursor({
         date: lastItem.created_at.toISOString(),
@@ -261,13 +254,38 @@ export async function getAllListings({
       });
     }
 
+    const cleanedData = data.map(
+      (datum) =>
+        ({
+          id: datum.id,
+          title: datum.title,
+          address: datum.address,
+          description: datum.description,
+          propertyType: datum.property_type,
+          location: datum.location,
+          distanceInMiles: Number(datum.distance_in_miles),
+          price: Number(datum.price),
+          numRoomsAvailable: datum.num_rooms_available,
+          totalRooms: datum.total_rooms,
+          numberRoommates: datum.number_roommates,
+          utilitiesIncluded: datum.utilities_included,
+          sqft: datum.sqft,
+          imageUrls: datum.imageUrls,
+          startDate: datum.start_date,
+          endDate: datum.end_date,
+          createdAt: datum.created_at,
+          updatedAt: datum.updated_at,
+          listerId: datum.lister_id,
+        } as AppListing)
+    );
+
     return {
       isError: false,
       data: {
         totalCount,
         thisPageCount,
         nextCursor,
-        data,
+        data: cleanedData,
       },
     };
   } catch (e) {

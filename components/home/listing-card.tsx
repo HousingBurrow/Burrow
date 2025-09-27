@@ -1,6 +1,7 @@
 import React, { FC } from "react";
 import { Card, Typography, Button } from "antd";
 import Image from "next/image";
+import { startCase } from "lodash";
 
 const { Text, Title } = Typography;
 
@@ -19,10 +20,10 @@ const ListingCard: FC<ListingCardProps> = ({ listing, onViewDetails }) => {
   return (
     <Card
       hoverable
-      cover={<Image alt={title} src={imageUrl} width={"100"} height={100} />}
+      cover={<Image alt={title} src={imageUrl} width={100} height={100} />}
     >
       <Title level={5}>{title}</Title>
-      <Text type="secondary">{location}</Text>
+      <Text type="secondary">{startCase(location)}</Text>
       <br />
       <Text strong>{`$${price.toString()}`}</Text>
       {onViewDetails && (

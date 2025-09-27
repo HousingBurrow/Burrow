@@ -20,6 +20,8 @@ export function Header() {
         display: "flex",
         justifyContent: "space-between",
         borderBottom: "1px solid #f0f0f0",
+        top: 0,
+        zIndex: 1000
       }}
     >
       <Link href="/">
