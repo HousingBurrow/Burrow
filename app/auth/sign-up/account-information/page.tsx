@@ -2,61 +2,73 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { CurrentUser } from "@stackframe/stack";
-import { createUser } from "@/lib/queries/users";
 import { Form, Input, Select, InputNumber, Button, Card, Typography, message } from "antd";
-import { email } from "zod";
 
 const { Title } = Typography;
 
-interface ExtendedCurrentUser extends CurrentUser {
-  email?: string; 
+interface AccountFormValues {
+  firstName: string;
+  lastName: string;
+  gender: string;
+  age: number;
 }
 
-export default function AccountInformationPage({ user }: { user: ExtendedCurrentUser | null }) {
+interface AccountInformationPageProps {
+  initialEmail: string;
+}
+
+export default function AccountInformationPage({ initialEmail }: AccountInformationPageProps) {
   const [form] = Form.useForm();
   const router = useRouter();
 
-  const initialEmail = user?.email ?? ""; 
-
   useEffect(() => {
-    if (user) {
-      form.setFieldsValue({ email: initialEmail });
-    }
-  }, [user, form, initialEmail]);
+    form.setFieldsValue({ gender: "other", email: initialEmail });
+  }, [form, initialEmail]);
 
-  const handleSubmit = async (values: {
-    firstName: string;
-    lastName: string;
-    gender: string;
-    age: number;
-  }) => {
-    const result = await createUser({
-      email: initialEmail,
-      firstName: values.firstName,
-      lastName: values.lastName,
-      gender: values.gender,
-      age: Number(values.age),
-    });
+  const handleSubmit = async (values: AccountFormValues) => {
+    try {
+      const response = await fetch("/api/users/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: initialEmail,
+          firstName: values.firstName,
+          lastName: values.lastName,
+          gender: values.gender,
+          age: Number(values.age),
+        }),
+      });
 
-    if (result.isError) {
-      console.error("Error creating user:", result.message);
-      message.error("Failed to create user.");
-    } else {
+      if (!response.ok) {
+        const errorData = await response.json();
+        message.error(errorData.message || "Failed to create user.");
+        return;
+      }
+
       message.success("User created successfully!");
-      router.push("../../"); // redirect after success
+      router.push("/app"); // redirect after success
+    } catch (error) {
+      console.error("Error creating user:", error);
+      message.error("An unexpected error occurred.");
     }
   };
 
   return (
-    <div style={{ display: "flex", justifyContent: "center", padding: "50px" }}>
-      <Card style={{ width: 400, padding: "20px" }}>
-        <Title level={3} style={{ textAlign: "center", marginBottom: "20px" }}>
+    <div style={{ display: "flex", justifyContent: "center", padding: 50 }}>
+      <Card style={{ width: 400, padding: 20 }}>
+        <Title level={3} style={{ textAlign: "center", marginBottom: 20 }}>
           Account Information
         </Title>
-        <Form form={form} layout="vertical" onFinish={handleSubmit} initialValues={{ gender: "Not Selected Yet", email: initialEmail }}>
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={handleSubmit}
+          initialValues={{ gender: "other", email: initialEmail }}
+        >
           <Form.Item label="Email" name="email">
-            <Input disabled />
+            <Input placeholder="Enter email" />
           </Form.Item>
 
           <Form.Item
