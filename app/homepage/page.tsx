@@ -11,8 +11,8 @@ import {
   Col,
   Card,
   Typography,
-  Space,
 } from "antd";
+
 import { SearchOutlined } from "@ant-design/icons";
 import type { Dayjs } from "dayjs";
 
@@ -39,7 +39,6 @@ export const SearchBar: FC = () => {
         borderRadius: 999,
         padding: "8px 12px",
         boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
-        gap: 8,
         minWidth: 600,
       }}
     >
@@ -113,34 +112,26 @@ export default function HomePage() {
   ];
 
   return (
-    <div style={{ minHeight: "100vh", background: "#f0f2f5" }}>
-      {/* Header */}
-      <Row
-        justify="space-between"
-        align="middle"
-        style={{ background: "#fff", padding: "16px 32px" }}
-      >
-        <Title level={3} style={{ margin: 0 }}>
-          BURROW
-        </Title>
-        <Space>
-          <Link href="/profile/about_me">
-            <Button type="text">Profile</Button>
-          </Link>
-          <Button type="text">Settings</Button>
-          <Button type="text">Logout</Button>
-        </Space>
-      </Row>
-
+    <div
+      style={{
+        height: "100%",
+        background: "#f0f2f5",
+        padding: "32px",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: "16px",
+      }}
+    >
       {/* Search bar */}
-      <Row justify="center" style={{ marginTop: 32, width: "2000" }}>
+      <Row justify="center" style={{ width: "75%", marginInline: "32px" }}>
         <Col>
           <SearchBar />
         </Col>
       </Row>
 
       {/* Listings */}
-      <Row gutter={[16, 16]} style={{ padding: "32px" }}>
+      <Row gutter={[16, 16]} style={{ width: "100%" }}>
         {listings.map((listing) => (
           <Col key={listing.id} xs={24} sm={12} md={8} lg={6}>
             <Card
