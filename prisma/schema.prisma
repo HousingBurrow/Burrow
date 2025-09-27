@@ -70,6 +70,7 @@ model Listing {
   number_roommates        Int
   utilities_included      Boolean
   SqFt                    Int
+  imageUrl                String
 
   start_date              DateTime
   end_date                DateTime
@@ -102,5 +103,7 @@ model HouseDetails {
   num_bathrooms     Decimal
   num_rooms         Int
 }
+
+
 
 
