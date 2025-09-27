@@ -25,7 +25,6 @@ import {
   FiTrash2,
 } from "react-icons/fi";
 import { updateUser, deleteUser } from "@/lib/queries/users";
-import { signOut } from "next-auth/react";
 import "./settings.css";
 
 const { Title, Text } = Typography;
@@ -99,7 +98,6 @@ export default function ClientSettings({
     if (res.isError) message.error(res.message || "Failed to delete account");
     else {
       message.success("Account deleted successfully");
-      await signOut({ callbackUrl: "/" });
     }
   };
 
