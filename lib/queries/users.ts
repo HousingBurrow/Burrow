@@ -1,9 +1,8 @@
-'use server';
+"use server";
 
 import { User } from "@prisma/client";
-import { ActionResult } from '../utils/action-result';
-import { prisma } from '../../../lib/prisma';
-
+import { ActionResult } from "../utils/action-result";
+import { prisma } from "../../lib/prisma";
 
 interface CreateUserProps {
   email: string;
@@ -13,29 +12,34 @@ interface CreateUserProps {
   age: number;
 }
 
-export async function createUser({ email, firstName, lastName, gender, age }: CreateUserProps): ActionResult<User> {
+export async function createUser({
+  email,
+  firstName,
+  lastName,
+  gender,
+  age,
+}: CreateUserProps): ActionResult<User> {
   try {
     const user = await prisma.user.create({
-      data: { 
+      data: {
         email: email,
         first_name: firstName,
         last_name: lastName,
         gender: gender,
         age: age,
-      }
+      },
     });
 
-    return { isError: false, data: user }
+    return { isError: false, data: user };
   } catch (e) {
     console.error("Error creating user", e);
-    return { isError: true, message: (e as Error).message}; 
+    return { isError: true, message: (e as Error).message };
   }
 }
 
-
 export async function updateUser(
   id: number,
-  email?: string,          // used as a WHERE filter if provided
+  email?: string, // used as a WHERE filter if provided
   firstName?: string,
   lastName?: string,
   gender?: string,
@@ -45,14 +49,14 @@ export async function updateUser(
   const data = Object.fromEntries(
     Object.entries({
       first_name: firstName,
-      last_name:  lastName,
+      last_name: lastName,
       gender,
       age,
     }).filter(([, v]) => v !== undefined)
   );
 
   if (Object.keys(data).length === 0) {
-    throw new Error('No fields to update');
+    throw new Error("No fields to update");
   }
 
   // Prefer updating by email if provided; else use id
@@ -71,29 +75,23 @@ export async function updateUser(
   }
 }
 
-
-
 // returns users given userID
 export async function getUserById(id: number): ActionResult<User> {
   try {
-    const user = await prisma.user.findUniqueOrThrow({ where: { id}});
-    return { isError: false, data: user};
+    const user = await prisma.user.findUniqueOrThrow({ where: { id } });
+    return { isError: false, data: user };
   } catch (e) {
     console.log("Error getting user", e);
-    return {isError: true, message: (e as Error).message };
+    return { isError: true, message: (e as Error).message };
   }
 }
-
-
 
 export async function deleteUser(id: number): ActionResult<User> {
   try {
-    const user = await prisma.user.delete({ where: { id }});
-    return { isError: false, data: user}
+    const user = await prisma.user.delete({ where: { id } });
+    return { isError: false, data: user };
   } catch (e) {
     console.log("Error deleting user", e);
-    return {isError: true, message: (e as Error).message };
+    return { isError: true, message: (e as Error).message };
   }
 }
-
-
