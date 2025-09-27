@@ -1,50 +1,27 @@
 'use client'
 
-import { Box, VStack, Heading, Text, Avatar, Button } from '@chakra-ui/react'
+import { Card, Avatar, Typography, Button, Space } from 'antd'
+import { UserOutlined } from '@ant-design/icons'
 
-export default function ProfileAboutPage() {
+export default function AboutMePage() {
   return (
-    <VStack align="stretch" gap={8}>
+    <Space direction="vertical" size="large" style={{ display: 'flex' }}>
       {/* Profile card */}
-      <Box
-        borderWidth="1px"
-        borderRadius="2xl"
-        shadow="sm"
-        bg="white"
-        _dark={{ bg: 'gray.800', borderColor: 'gray.700' }}
-        p={8}
-        textAlign="center"
-      >
-        <VStack gap={3}>
-          <Avatar.Root size="2xl">
-            {/* If you have a photo: <Avatar.Image src="/me.jpg" alt="Your Name" /> */}
-            <Avatar.Fallback name="Cloud" />
-          </Avatar.Root>
-          <Heading size="md">Cloud</Heading>
-          <Text color="gray.500" _dark={{ color: 'gray.400' }}>
-            Guest
-          </Text>
-          <Button colorScheme="teal" variant="outline" size="sm">
-            Edit profile
-          </Button>
-        </VStack>
-      </Box>
+      <Card>
+        <Space direction="vertical" align="center" style={{ width: '100%' }}>
+          <Avatar size={96} icon={<UserOutlined />} />
+          <Typography.Title level={4} style={{ marginBottom: 0 }}>
+            Priarie
+          </Typography.Title>
 
-      {/* Callout */}
-      <Box
-        borderWidth="1px"
-        borderRadius="2xl"
-        shadow="sm"
-        bg="white"
-        _dark={{ bg: 'gray.800', borderColor: 'gray.700' }}
-        p={6}
-      >
-        <Heading size="md" mb={2}>Complete your profile</Heading>
-        <Text color="gray.600" _dark={{ color: 'gray.300' }} mb={4}>
-          Add a photo and a short bio so hosts and guests can get to know you.
-        </Text>
-        <Button colorScheme="pink" size="sm">Get started</Button>
-      </Box>
-    </VStack>
+          {/* ✅ About me section */}
+          <Typography.Paragraph type="secondary" style={{ textAlign: 'center', marginTop: 8 }}>
+            Hi, I’m Priarie. I love traveling, meeting new people, and finding cozy homes in the city.
+          </Typography.Paragraph>
+
+          <Button>Edit profile</Button>
+        </Space>
+      </Card>
+    </Space>
   )
 }
