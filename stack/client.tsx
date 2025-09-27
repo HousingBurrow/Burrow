@@ -5,8 +5,9 @@ export const stackClientApp = new StackClientApp({
   urls: {
     home: "/",
     afterSignIn: "/",
-    afterSignUp: "/",
+    afterSignUp: "/auth/sign-up/account-information",
     signIn: "/auth/sign-in",
     signUp: "/auth/sign-up",
   },
-});
+  },
+);

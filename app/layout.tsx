@@ -20,7 +20,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <StackTheme>
             <Provider>
               <ClientProviders>
-                <Suspense>
                 <div
                   style={{
                     minHeight: "100vh",
@@ -29,13 +28,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                     width: "100vw",
                   }}
                 >
-                  <Header />
+                  {/* Wrap only client components that use useUser in Suspense */}
+                  <Suspense fallback={<div>Loading user...</div>}>
+                    <Header />
+                  </Suspense>
 
                   <div style={{ height: "100%", width: "100%" }}>
                     {children}
                   </div>
                 </div>
-                </Suspense>
               </ClientProviders>
             </Provider>
           </StackTheme>
