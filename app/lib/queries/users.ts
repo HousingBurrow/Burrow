@@ -1,10 +1,7 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
 import { User } from '@/generated/prisma';
 import { ActionResult } from '../utils/action-result';
-import { number } from 'framer-motion';
 import { prisma } from '../../lib/prisma';
 
 interface CreateUserProps {
@@ -85,6 +82,8 @@ export async function getUserById(id: number): ActionResult<User> {
     return {isError: true, message: (e as Error).message };
   }
 }
+
+
 
 export async function deleteUser(id: number): ActionResult<User> {
   try {
