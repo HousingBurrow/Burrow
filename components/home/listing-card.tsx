@@ -20,7 +20,18 @@ const ListingCard: FC<ListingCardProps> = ({ listing, onViewDetails }) => {
   return (
     <Card
       hoverable
-      cover={<Image alt={title} src={imageUrl} width={100} height={100} />}
+      cover={
+        <div style={{ position: 'relative', width: '100%', height: 200 }}>
+          <Image 
+            alt={title} 
+            src={imageUrl} 
+            fill
+            style={{ objectFit: 'cover' }}
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            quality={85}
+          />
+        </div>
+      }
     >
       <Title level={5}>{title}</Title>
       <Text type="secondary">{startCase(location)}</Text>
