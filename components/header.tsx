@@ -15,11 +15,11 @@ export function Header() {
     <Row
       style={{
         background: "#fff",
-        height: 64, 
+        height: 64,
         padding: "0 32px",
         display: "flex",
         justifyContent: "space-between",
-        alignItems: "center", 
+        alignItems: "center",
         borderBottom: "1px solid #f0f0f0",
         top: 0,
         zIndex: 1000,
@@ -32,7 +32,7 @@ export function Header() {
           display: "flex",
           alignItems: "center",
           gap: 8,
-          height: "100%", 
+          height: "100%",
         }}
       >
         <Image
@@ -45,15 +45,13 @@ export function Header() {
       </Link>
 
       <Space>
-        {isProfilePage ? (
-          <Link href="/">
-            <Button type="text">Home</Button>
-          </Link>
-        ) : (
-          <Link href="/profile/about_me">
-            <Button type="text">Profile</Button>
-          </Link>
-        )}
+        <Link href="/">
+          <Button type="text">Home</Button>
+        </Link>
+
+        <Link href="/profile/about_me">
+          <Button type="text">Profile</Button>
+        </Link>
 
         <Link href="/settings/">
           <Button type="text">Settings</Button>
@@ -69,7 +67,7 @@ export function Header() {
             </Link>
           </>
         ) : (
-          <Button type="primary" onClick={() => user.signOut()}>
+          <Button type="primary" variant="outlined" onClick={() => user.signOut()}>
             Logout
           </Button>
         )}
