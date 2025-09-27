@@ -1,7 +1,9 @@
 "use client";
 
 import ListingCard from "@/components/ui/listing-card";
+import { getListingById } from "@/lib/queries/listings";
 import { SearchOutlined } from "@ant-design/icons";
+import { useQuery } from "@tanstack/react-query";
 import {
   Button,
   Col,
@@ -10,7 +12,7 @@ import {
   Modal,
   Row,
   Select,
-  Typography
+  Typography,
 } from "antd";
 import type { Dayjs } from "dayjs";
 import { FC, useState } from "react";
@@ -110,25 +112,18 @@ export const SearchBar: FC = () => {
 };
 
 export default function HomePage() {
-  const listings = [
-    {
-      id: 1,
-      title: "Cozy dorm near campus",
-      price: "$500/month",
-      location: "Georgia Tech",
-      availableRooms: 1,
-      totalRooms: 3,
-      propertyType: "Dorm",
-      utilitiesIncluded: true,
-      squareFeet: 350,
-      description: "A cozy dorm located very close to campus.",
-      images: [
-        "https://via.placeholder.com/600x400",
-        "https://via.placeholder.com/600x401",
-        "https://via.placeholder.com/600x402",
-      ],
+  const { isLoading, data } = useQuery({
+    queryKey: ["listing", 1],
+    queryFn: async () => {
+      const response = await getListingById(1);
+      if (response.isError) {
+        return null;
+      }
+      return response.data;
     },
-  ];
+  });
+
+  const listings = data ? [data] : [];
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedListing, setSelectedListing] = useState<
@@ -157,8 +152,12 @@ export default function HomePage() {
         {listings.map((listing) => (
           <Col key={listing.id} xs={24} sm={12} md={8} lg={6}>
             <ListingCard
-              {...listing}
-              image={listing.images[0]}
+              listing={{
+                title: listing.title,
+                location: listing.location,
+                price: Number(listing.price),
+                imageUrl: listing.imageUrls[0],
+              }}
               onViewDetails={() => showModal(listing)}
             />
           </Col>
@@ -172,7 +171,9 @@ export default function HomePage() {
         onCancel={handleCancel}
         width="90%"
         style={{ top: "5%", padding: 0 }}
-        bodyStyle={{ padding: 0, overflow: "hidden" }}
+        styles={{
+          body: { padding: 0, overflow: "hidden" },
+        }}
         footer={null}
       >
         <div style={{ display: "flex", height: "80vh" }}>
@@ -188,7 +189,7 @@ export default function HomePage() {
               padding: "8px",
             }}
           >
-            {selectedListing?.images?.map((img, idx) => (
+            {/* {selectedListing?.images?.map((img, idx) => (
               <img
                 key={idx}
                 src={img}
@@ -200,7 +201,7 @@ export default function HomePage() {
                   borderRadius: 8,
                 }}
               />
-            ))}
+            ))} */}
           </div>
 
           {/* Right side: Listing details */}
@@ -221,7 +222,7 @@ export default function HomePage() {
                 {selectedListing?.title}
               </h1>
               <Text strong style={{ fontSize: 20, color: "#222" }}>
-                {selectedListing?.price}
+                {selectedListing?.price.toString()}
               </Text>
             </div>
             {/* Rooms and Property Info */}
@@ -235,15 +236,15 @@ export default function HomePage() {
               }}
             >
               <Text>
-                <strong>Rooms:</strong> {selectedListing?.availableRooms} /{" "}
-                {selectedListing?.totalRooms}
+                <strong>Rooms:</strong>{" "}
+                {selectedListing?.num_rooms_available.toString()} /{" "}
+                {selectedListing?.total_rooms.toString()}
               </Text>
               <Text>
-                <strong>Property Type:</strong> {selectedListing?.propertyType}
+                <strong>Property Type:</strong> {selectedListing?.property_type}
               </Text>
               <Text>
-                <strong>Square Footage:</strong> {selectedListing?.squareFeet}{" "}
-                sqft
+                <strong>Square Footage:</strong> {selectedListing?.sqft} sqft
               </Text>
             </div>
             {/* Location */}
@@ -256,7 +257,7 @@ export default function HomePage() {
             <div style={{ borderBottom: "1px solid #eee", paddingBottom: 16 }}>
               <Text>
                 <strong>Utilities Included:</strong>{" "}
-                {selectedListing?.utilitiesIncluded ? "Yes" : "No"}
+                {selectedListing?.utilities_included ? "Yes" : "No"}
               </Text>
             </div>
             {/* Description */}

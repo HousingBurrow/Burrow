@@ -4,7 +4,7 @@ import { Listing, Location, PropertyType } from "@prisma/client";
 import { prisma } from "../../lib/prisma";
 import { ActionResult } from "../utils/action-result";
 
-interface CreateListingsProp {
+interface CreateListingsProps {
   distance: number;
   address: string;
   description: string;
@@ -20,34 +20,13 @@ interface CreateListingsProp {
 
   propertyType: PropertyType;
   location: Location;
-  imageUrl: string;
+  imageUrls: string[];
   listerId: number;
   createdAt: Date;
   updatedAt: Date;
 }
 
-// keep your existing imports (but remove any unused ones to avoid build errors)
-
-interface UpdateListingProps {
-  distance?: number;
-  address?: string;
-  description?: string;
-  startDate?: Date;
-  endDate?: Date;
-  numRoomsAvailable?: number;
-  numberRoommates?: number;
-  totalRooms?: number;
-  title?: string;
-  price?: number;
-  utilitiesIncluded?: boolean;
-  sqFt?: number;
-
-  propertyType?: PropertyType;
-  location?: Location;
-  imageUrl?: string;
-  listerId?: number;
-  updatedAt?: Date; // if your schema doesn't use @updatedAt
-}
+type UpdateListingProps = Partial<CreateListingsProps>;
 
 type ListingUpdateArgs = Parameters<typeof prisma.listing.update>[0];
 type ListingUpdateInput = ListingUpdateArgs["data"];
@@ -87,7 +66,7 @@ export async function updateListing(
         ? { property_type: patch.propertyType }
         : {}),
       ...(patch.location !== undefined ? { Location: patch.location } : {}),
-      ...(patch.imageUrl !== undefined ? { imageUrl: patch.imageUrl } : {}),
+      ...(patch.imageUrls !== undefined ? { imageUrls: patch.imageUrls } : {}),
       ...(patch.listerId !== undefined ? { listerId: patch.listerId } : {}),
       // If your schema does NOT use @updatedAt, set it here:
       ...(patch.updatedAt !== undefined
@@ -131,11 +110,11 @@ export async function createListing({
   sqFt,
   propertyType,
   location,
-  imageUrl,
+  imageUrls,
   listerId,
   createdAt,
   updatedAt,
-}: CreateListingsProp): ActionResult<Listing> {
+}: CreateListingsProps): ActionResult<Listing> {
   try {
     const listing = await prisma.listing.create({
       data: {
@@ -147,14 +126,13 @@ export async function createListing({
         num_rooms_available: numRoomsAvailable,
         number_roommates: numberRoommates,
         total_rooms: totalRooms,
-        Title: title,
+        title: title,
         price,
         utilities_included: utilitiesIncluded,
-
-        SqFt: sqFt,
+        sqft: sqFt,
         property_type: propertyType,
-        Location: location,
-        imageUrl,
+        location: location,
+        imageUrls,
         listerId,
         created_at: createdAt,
         updated_at: updatedAt,
@@ -172,7 +150,11 @@ export async function createListing({
 
 export async function getListingById(id: number): ActionResult<Listing> {
   try {
-    const listing = await prisma.listing.findUniqueOrThrow({ where: { id } });
+    const rawListing = await prisma.listing.findUniqueOrThrow({
+      where: { id },
+    });
+    const listing = JSON.parse(JSON.stringify(rawListing));
+
     return { isError: false, data: listing };
   } catch (e) {
     console.log("Error getting listing", e);

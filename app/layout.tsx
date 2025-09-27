@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Provider } from "@/components/ui/provider";
 import { StackProvider, StackTheme } from "@stackframe/stack";
-import { stackClientApp } from "@/stack/client";
 import { Header } from "@/components/header";
+import { stackServerApp } from "@/stack/server";
+import ClientProviders from "@/components/client-providers";
 
 export const metadata: Metadata = {
   title: "Burrow",
@@ -15,27 +16,26 @@ export default function RootLayout(props: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
-        <StackProvider app={stackClientApp}>
+        <StackProvider app={stackServerApp}>
           <StackTheme>
-            <StackProvider app={stackClientApp}>
-              <StackTheme>
-                <Provider>
-                  <div
-                    style={{
-                      minHeight: "100vh",
-                      minWidth: "100vw",
-                      height: "100vh",
-                      width: "100vh",
-                    }}
-                  >
-                    <Header />
-                    <div style={{ height: "100%", width: "100%" }}>
-                      {children}
-                    </div>
+            <Provider>
+              <ClientProviders>
+                <div
+                  style={{
+                    minHeight: "100vh",
+                    minWidth: "100vw",
+                    height: "100vh",
+                    width: "100vw",
+                  }}
+                >
+                  <Header />
+
+                  <div style={{ height: "100%", width: "100%" }}>
+                    {children}
                   </div>
-                </Provider>
-              </StackTheme>
-            </StackProvider>
+                </div>
+              </ClientProviders>
+            </Provider>
           </StackTheme>
         </StackProvider>
       </body>
