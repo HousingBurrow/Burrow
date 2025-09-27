@@ -3,7 +3,7 @@
 import { User } from "@prisma/client";
 import { ActionResult } from '../utils/action-result';
 import { prisma } from '../../lib/prisma';
-import { a } from "framer-motion/client";
+
 
 interface CreateUserProps {
   email: string;
