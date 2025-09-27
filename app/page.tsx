@@ -34,6 +34,7 @@ const priceOptions = [
 ];
 
 
+
 export const SearchBar: FC = () => {
  const [location, setLocation] = useState<string | undefined>();
  const [dates, setDates] = useState<[Dayjs, Dayjs] | null>(null);

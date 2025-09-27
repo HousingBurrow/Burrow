@@ -13,14 +13,18 @@ export function Header() {
         justifyContent: "space-between"
       }}
     >
+      <Link href="/">
       <Title level={3} style={{ margin: 0 }}>
-        BURROW
-      </Title>
+          BURROW
+        </Title>
+      </Link>
       <Space>
         <Link href="/profile/about_me">
           <Button type="text">Profile</Button>
         </Link>
-        <Button type="text">Settings</Button>
+        <Link href="/settings/">
+          <Button type="text">Settings</Button>
+        </Link>
         <Button type="text">Logout</Button>
       </Space>
     </Row>
