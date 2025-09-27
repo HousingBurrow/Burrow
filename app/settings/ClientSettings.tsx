@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useTransition, useEffect } from "react";
+import React, { useState, useTransition } from "react";
 import {
   Form,
   Input,
@@ -62,6 +62,9 @@ export default function ClientSettings({
   const [formData, setFormData] = useState<SettingsState>(initial);
   const [saving, startTransition] = useTransition();
 
+  // Ant Design message instance
+  const [msgApi, contextHolder] = message.useMessage();
+
   // ------------------- Handle input changes -------------------
   const handleInputChange = <K extends keyof SettingsState>(
     key: K,
@@ -82,8 +85,8 @@ export default function ClientSettings({
         gender: formData.gender,
       });
 
-      if (res.isError) message.error(res.message || "Failed to save changes");
-      else message.success("Settings saved successfully");
+      if (res.isError) msgApi.error(res.message || "Failed to save changes");
+      else msgApi.success("Settings saved successfully");
     });
   };
 
@@ -95,14 +98,13 @@ export default function ClientSettings({
     if (!confirm) return;
 
     const res = await deleteUser(userId);
-    if (res.isError) message.error(res.message || "Failed to delete account");
-    else {
-      message.success("Account deleted successfully");
-    }
+    if (res.isError) msgApi.error(res.message || "Failed to delete account");
+    else msgApi.success("Account deleted successfully");
   };
 
   return (
     <div style={{ minHeight: "100vh", padding: 32 }}>
+      {contextHolder}
       <Card
         style={{
           maxWidth: 900,
@@ -156,7 +158,7 @@ export default function ClientSettings({
                   </div>
                 </Col>
                 <Col flex="auto">
-                  <Text style={{ fontSize: 14, color: "#595959" }}>
+                  <Text style={{ fontSize: 14, color: "#6F826A" }}>
                     Upload a new profile picture. JPG, PNG, or GIF. Max 2MB.
                   </Text>
                 </Col>
@@ -234,7 +236,12 @@ export default function ClientSettings({
 
               <div style={{ textAlign: "right", marginTop: 32 }}>
                 <Space>
-                  <Button disabled={saving}>Cancel</Button>
+                  <Button
+                    onClick={() => setFormData(initial)}
+                    disabled={saving}
+                  >
+                    Cancel
+                  </Button>
                   <Button
                     type="primary"
                     onClick={handleSave}
@@ -325,7 +332,7 @@ export default function ClientSettings({
               type="inner"
               title="Danger Zone"
               style={{
-                borderColor: "#9A3F3F',",
+                borderColor: "#9A3F3F",
                 borderWidth: 1,
                 borderStyle: "solid",
                 borderRadius: 16,
