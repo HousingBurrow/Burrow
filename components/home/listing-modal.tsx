@@ -45,12 +45,17 @@ export default function ListingModal({
               key={idx}
               src={img}
               alt={`${selectedListing.title} - ${idx + 1}`}
+              width={1600}           // intrinsic dimensions (any consistent ratio works)
+              height={1067}
+              sizes="(max-width: 768px) 100vw, 60vw"
+              quality={40}
               style={{
-                width: "100%",
-                height: "80%",
-                objectFit: "cover",
+                width: "100%",       // responsive
+                height: "auto",      // keep aspect ratio
                 borderRadius: 8,
+                objectFit: "cover",
               }}
+              priority={idx === 0}
             />
           ))}
         </div>
