@@ -36,7 +36,7 @@ export function Header() {
           </Link>
         )}
 
-        <Link href="/settings">
+        <Link href="/settings/">
           <Button type="text">Settings</Button>
         </Link>
 
