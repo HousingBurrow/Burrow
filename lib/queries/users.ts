@@ -1,9 +1,8 @@
 "use server";
 
-import { Listing, Prisma, User } from "@prisma/client";
-import { ActionResult } from "../utils/action-result";
+import { Listing, User } from "@prisma/client";
 import { prisma } from "../../lib/prisma";
-import { isError } from "lodash";
+import { ActionResult } from "../utils/action-result";
 
 interface CreateUserProps {
   authId: string;
@@ -51,6 +50,7 @@ type updateUserProps = {
   lastName?: string;
   age?: number;
   gender?: string;
+  pfp?: string;
 };
 export async function updateUser({
   id,
@@ -59,6 +59,7 @@ export async function updateUser({
   lastName,
   age,
   gender,
+  pfp,
 }: updateUserProps): ActionResult<User> {
   try {
     const user = await prisma.user.update({
@@ -69,6 +70,7 @@ export async function updateUser({
         last_name: lastName,
         age: age,
         gender: gender,
+        pfp: pfp,
       },
     });
     return { isError: false, data: user };
