@@ -7,7 +7,7 @@ import { getAllListings } from "@/lib/queries/listings";
 import { AppListing } from "@/lib/schemas";
 import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query";
 import { Button, Col, Divider, Row, Typography } from "antd";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { LuBookmark } from "react-icons/lu";
 import InfiniteScroll from "react-infinite-scroll-component";
 import z from "zod";
@@ -98,7 +98,6 @@ export default function HomePage() {
     queryFn: async () => {
       if (dbUser) {
         const response = await getSavedListingsForUser(dbUser.id);
-        console.log(response);
         if (response.isError) {
           return undefined;
         }
@@ -136,6 +135,12 @@ export default function HomePage() {
   };
 
   const handleCancel = () => setIsModalOpen(false);
+
+  // useEffect(() => {
+  //   console.log("user", user)
+  //   console.log("dbUser",dbUser)
+  //   console.log("saved",savedListingsIds )
+  // }, [user, dbUser, savedListingsIds])
 
   return (
     <div style={{ maxWidth: "100%", overflow: "hidden" }}>
