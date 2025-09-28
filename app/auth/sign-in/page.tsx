@@ -83,7 +83,7 @@ export default function Page() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        backgroundColor: "#f3f4f6", // light gray
+        backgroundColor: "#DCCFC0", // light gray
         height: "85vh",
       }}
     >
