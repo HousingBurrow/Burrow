@@ -24,7 +24,6 @@ import {
   FiShield,
   FiTrash2,
   FiUser,
-  PlusOutlined,
 } from "react-icons/fi";
 import { updateUser, deleteUser } from "@/lib/queries/users";
 import "./settings.css";
