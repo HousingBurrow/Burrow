@@ -54,7 +54,7 @@ export function Header() {
         </Link>
 
         <Link href="/new-listing">
-          <Button type="text">Create New Listing</Button>
+          <Button type="text">New Listing</Button>
         </Link>
 
         {!user ? (
