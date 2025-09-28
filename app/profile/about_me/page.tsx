@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { Card, Avatar, Typography, Button, Space, Spin } from 'antd'
 import { UserOutlined } from '@ant-design/icons'
+import { useRouter } from 'next/navigation'
 import { getUserByEmail } from '@/lib/queries/users'
 
 type User = {
@@ -15,6 +16,7 @@ type User = {
 }
 
 export default function AboutMePage() {
+  const router = useRouter()
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -22,15 +24,13 @@ export default function AboutMePage() {
   useEffect(() => {
     async function load() {
       try {
-        // 1) ask server who is logged in
         const me = await fetch('/api/auth/me', { cache: 'no-store' })
         if (!me.ok) {
           setError('Please sign in.')
           return
         }
-        const { email } = await me.json() as { email: string }
+        const { email } = (await me.json()) as { email: string }
 
-        // 2) use YOUR QUERY to fetch the Prisma user by email
         const res = await getUserByEmail(email)
         if (res.isError) {
           setError(res.message ?? 'Failed to fetch user')
@@ -54,13 +54,9 @@ export default function AboutMePage() {
 
   if (loading) return <Spin />
 
-  if (error) {
-    return <Typography.Text type="danger">{error}</Typography.Text>
-  }
+  if (error) return <Typography.Text type="danger">{error}</Typography.Text>
 
-  if (!user) {
-    return <Typography.Text type="danger">No user found.</Typography.Text>
-  }
+  if (!user) return <Typography.Text type="danger">No user found.</Typography.Text>
 
   return (
     <Space direction="vertical" size="large" style={{ display: 'flex' }}>
@@ -78,7 +74,9 @@ export default function AboutMePage() {
             Age: {user.age ?? 'Not set'}
           </Typography.Paragraph>
 
-          <Button>Edit profile</Button>
+          <Button type="primary" onClick={() => router.push('/settings')}>
+            Edit profile
+          </Button>
         </Space>
       </Card>
     </Space>
