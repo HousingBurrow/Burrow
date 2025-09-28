@@ -1,7 +1,7 @@
 // app/profile/about_me/page.tsx
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
-import AboutMeClient from "./AboutMeClient.tsx";
+import AboutMeClient from "./AboutMeClient";
 
 // Reuse the same Stack server app as your Settings page
 import { stackServerApp } from "../../settings/stack";
