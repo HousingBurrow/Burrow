@@ -24,7 +24,6 @@ import {
   FiShield,
   FiTrash2,
   FiUser,
-  PlusOutlined,
 } from "react-icons/fi";
 import { updateUser, deleteUser } from "@/lib/queries/users";
 import "./settings.css";
@@ -35,7 +34,12 @@ const { Title, Text } = Typography;
 const genders = ["Male", "Female", "Other", "Prefer not to say"] as const;
 type Gender = (typeof genders)[number];
 
-const locations = ["Midtown", "WestMidtown", "HomePark", "NorthAvenue"] as const;
+const locations = [
+  "Midtown",
+  "WestMidtown",
+  "HomePark",
+  "NorthAvenue",
+] as const;
 type DefaultLocation = (typeof locations)[number];
 
 type SettingsState = {
