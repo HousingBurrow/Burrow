@@ -4,8 +4,12 @@ import { Listing, Prisma, PropertyType, Location } from "@prisma/client";
 import { prisma } from "../../lib/prisma";
 import { AppListing } from "../schemas";
 import { ActionResult } from "../utils/action-result";
+import { revalidatePath } from "next/cache";
+import { put } from "@vercel/blob";
 
-type CreateListingsProps = Omit<AppListing, "id">;
+type CreateListingsProps = Omit<AppListing, "id" | "imageUrls"> & {
+  imageUrls: File[];
+};
 type UpdateListingProps = Partial<AppListing>;
 
 export async function updateListing({
@@ -76,12 +80,22 @@ export async function createListing({
   sqft,
   propertyType,
   location,
-  imageUrls,
+  imageUrls: images,
   listerId,
   createdAt,
   updatedAt,
 }: CreateListingsProps): ActionResult<Listing> {
   try {
+    const imageUrls: string[] = await Promise.all(
+      images.map(async (imageFile: File) => {
+        const blob = await put(imageFile.name, imageFile, {
+          access: "public",
+          addRandomSuffix: true,
+        });
+        return blob.url;
+      })
+    );
+
     const listing = await prisma.listing.create({
       data: {
         distance_in_miles: distanceInMiles,
@@ -310,4 +324,13 @@ export async function getAllListings({
     console.error(e);
     return { isError: true, message: (e as Error).message };
   }
+
+  async function uploadImage(formData: FormData) {
+      const imageFile = formData.get("image") as File;
+      const blob = await put(imageFile.name, imageFile, {
+        access: "public",
+        addRandomSuffix: true,
+      });
+      return blob.url;
+    }
 }
