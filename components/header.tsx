@@ -52,7 +52,7 @@ export function Header() {
         <Link href="/settings/">
           <Button type="text">Settings</Button>
         </Link>
-
+        
         {user && (
           <Link href="/new-listing">
             <Button type="text">New Listing</Button>
