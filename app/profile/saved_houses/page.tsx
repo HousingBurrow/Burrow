@@ -34,7 +34,6 @@ export default function MyListingsPage() {
     setIsModalOpen(true);
   };
 
-  const handleOk = () => setIsModalOpen(false);
   const handleCancel = () => setIsModalOpen(false);
 
   if (isLoading) return <Spin tip="Loading listings..." />;
@@ -58,7 +57,7 @@ export default function MyListingsPage() {
                   price: Number(listing.price),
                   imageUrl: listing.imageUrls[0],
                 }}
-                onClick={() => setIsModalOpen}
+                onCardClick={() => showModal(listing)}
               />
             </Col>
           ))}

@@ -2,11 +2,20 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Form, Input, Select, InputNumber, Button, Card, Typography, message } from "antd";
+import {
+  Form,
+  Input,
+  Select,
+  InputNumber,
+  Button,
+  Card,
+  Typography,
+  message,
+} from "antd";
 import { useMutation } from "@tanstack/react-query";
 import { createUser } from "@/lib/queries/users";
-import { initial } from "lodash";
 import { useUser } from "@stackframe/stack";
+import { useCurrentUser } from "@/lib/stack";
 
 const { Title } = Typography;
 
@@ -22,43 +31,50 @@ interface AccountInformationPageProps {
   initialEmail: string;
 }
 
-export default function AccountInformationPage({ initialEmail }: AccountInformationPageProps) {
+export default function AccountInformationPage({
+  initialEmail,
+}: AccountInformationPageProps) {
   const [form] = Form.useForm();
   const router = useRouter();
-  const user = useUser();
+  const user = useCurrentUser();
 
   useEffect(() => {
     form.setFieldsValue({ gender: "other", email: initialEmail });
   }, [form, initialEmail]);
 
   const handleSubmit = async (values: AccountFormValues) => {
-    createUserMutation.mutate(values)
+    createUserMutation.mutate(values);
   };
 
   const createUserMutation = useMutation({
     mutationFn: async (values: AccountFormValues) => {
-      const response = await createUser({
-        email: values.email,
-        firstName: values.firstName,
-        lastName: values.lastName,
-        gender: values.gender,
-        age: Number(values.age),
-        pfp: "",
-      })
+      if (user) {
+        const response = await createUser({
+          email: values.email,
+          firstName: values.firstName,
+          lastName: values.lastName,
+          gender: values.gender,
+          age: Number(values.age),
+          pfp: "",
+          authId: user?.id,
+        });
 
-      if (response.isError) {
-        message.error("Failed to create user.");
-        throw new Error(response.message);
+        if (response.isError) {
+          message.error("Failed to create user.");
+          throw new Error(response.message);
+        }
+      } else {
+        throw new Error("No user id");
       }
     },
     onSuccess: () => {
       console.log("User created successfully");
-      router.push("/")
+      router.push("/");
     },
     onError: () => {
       console.error("Error creating user");
-    }
-  })
+    },
+  });
 
   return (
     <div style={{ display: "flex", justifyContent: "center", padding: 50 }}>
@@ -72,14 +88,20 @@ export default function AccountInformationPage({ initialEmail }: AccountInformat
           onFinish={handleSubmit}
           initialValues={{ gender: "other", email: initialEmail }}
         >
-          <Form.Item label="Email" name="email" rules={[{ required: true, message: "Please input your email!" }]}>
+          <Form.Item
+            label="Email"
+            name="email"
+            rules={[{ required: true, message: "Please input your email!" }]}
+          >
             <Input placeholder="Enter email" />
           </Form.Item>
 
           <Form.Item
             label="First Name"
             name="firstName"
-            rules={[{ required: true, message: "Please input your first name!" }]}
+            rules={[
+              { required: true, message: "Please input your first name!" },
+            ]}
           >
             <Input placeholder="Enter first name" />
           </Form.Item>
@@ -87,7 +109,9 @@ export default function AccountInformationPage({ initialEmail }: AccountInformat
           <Form.Item
             label="Last Name"
             name="lastName"
-            rules={[{ required: true, message: "Please input your last name!" }]}
+            rules={[
+              { required: true, message: "Please input your last name!" },
+            ]}
           >
             <Input placeholder="Enter last name" />
           </Form.Item>
@@ -109,7 +133,12 @@ export default function AccountInformationPage({ initialEmail }: AccountInformat
             name="age"
             rules={[{ required: true, message: "Please input your age!" }]}
           >
-            <InputNumber style={{ width: "100%" }} min={0} max={120} placeholder="Enter age" />
+            <InputNumber
+              style={{ width: "100%" }}
+              min={0}
+              max={120}
+              placeholder="Enter age"
+            />
           </Form.Item>
 
           <Form.Item>

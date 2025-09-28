@@ -1,5 +1,4 @@
 "use client";
-"use client";
 
 import React, { useState, useTransition } from "react";
 import {
@@ -63,6 +62,7 @@ export default function ClientSettings({
 }) {
   const [formData, setFormData] = useState<SettingsState>(initial);
   const [saving, startTransition] = useTransition();
+  const user = useUser();
 
   // Ant Design message instance
   const [msgApi, contextHolder] = message.useMessage();
@@ -98,9 +98,37 @@ export default function ClientSettings({
     );
     if (!confirm) return;
 
-    const res = await deleteUser(userId);
-    if (res.isError) msgApi.error(res.message || "Failed to delete account");
-    else msgApi.success("Account deleted successfully");
+    try {
+      // Delete user from database
+      const res = await deleteUser(userId);
+      
+      if (res.isError) {
+        msgApi.error(res.message || "Failed to delete account");
+        return;
+      }
+
+      // Show success message briefly
+      msgApi.success("Account deleted successfully");
+
+      // Sign out from Stack Auth
+      if (user) {
+        await user.signOut();
+      }
+      
+      // Force redirect to home page after signout
+      setTimeout(() => {
+        window.location.replace("/");
+      }, 100);
+      
+    } catch (error) {
+      console.error("Error during account deletion:", error);
+      msgApi.error("An error occurred while deleting your account");
+      
+      // Even if there's an error, try to redirect
+      setTimeout(() => {
+        window.location.replace("/");
+      }, 1000);
+    }
   };
 
   return (
