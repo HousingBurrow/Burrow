@@ -21,12 +21,14 @@ export default function HomePage() {
     z.infer<typeof searchFormSchema> | undefined
   >();
 
-  useEffect(() => console.log(filterState), [filterState])
+  useEffect(() => console.log(filterState), [filterState]);
 
   // Transform SearchBar format to getAllListings format
-  const transformFilters = (searchData: z.infer<typeof searchFormSchema> | undefined) => {
+  const transformFilters = (
+    searchData: z.infer<typeof searchFormSchema> | undefined
+  ) => {
     if (!searchData) return undefined;
-    
+
     return {
       location: searchData.location,
       rooms: searchData.rooms,
@@ -66,7 +68,6 @@ export default function HomePage() {
     setIsModalOpen(true);
   };
 
-  const handleOk = () => setIsModalOpen(false);
   const handleCancel = () => setIsModalOpen(false);
 
   return (
@@ -95,30 +96,33 @@ export default function HomePage() {
         scrollThreshold={0.9} // triggers when 90% of page scrolled
         style={{ width: "100%" }}
       >
-        <Row gutter={[16, 16]} style={{ padding: "32px", width: "100%" }}>
-          {listings?.pages
-            .flatMap((page) => page.data)
-            .map((listing) => (
-              <Col key={listing.id} xs={24} sm={12} md={8} lg={6}>
-                <ListingCard
-                  listing={{
-                    title: listing.title,
-                    location: listing.location,
-                    price: Number(listing.price),
-                    imageUrl: listing.imageUrls[0],
-                  }}
-                  onClick={() => showModal(listing)}
-                />
-              </Col>
-            ))}
-        </Row>
+        {listings ? (
+          <Row gutter={[16, 16]} style={{ padding: "32px", width: "100%" }}>
+            {listings.pages
+              .flatMap((page) => page.data)
+              .map((listing) => (
+                <Col key={listing.id} xs={24} sm={12} md={8} lg={6}>
+                  <ListingCard
+                    listing={{
+                      title: listing.title,
+                      location: listing.location,
+                      price: Number(listing.price),
+                      imageUrl: listing.imageUrls[0],
+                    }}
+                    onClick={() => showModal(listing)}
+                  />
+                </Col>
+              ))}
+          </Row>
+        ) : (
+          <p style={{ textAlign: "center" }}>Loading...</p>
+        )}
       </InfiniteScroll>
 
       {selectedListing && (
         <ListingModal
           isOpen={isModalOpen}
-          handleCancel={handleCancel}
-          handleOk={handleOk}
+          onClose={handleCancel}
           selectedListing={selectedListing}
         />
       )}

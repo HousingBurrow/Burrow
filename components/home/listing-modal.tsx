@@ -1,22 +1,15 @@
+import { getUserById } from "@/lib/queries/users";
 import { AppListing } from "@/lib/schemas";
-import { Button, Modal, Typography, Badge } from "antd";
-import {
-  CalendarOutlined,
-  EnvironmentOutlined,
-  HomeOutlined,
-  DollarOutlined,
-} from "@ant-design/icons";
+import { CalendarOutlined, HomeOutlined } from "@ant-design/icons";
+import { User } from "@prisma/client";
+import { useQuery } from "@tanstack/react-query";
+import { Button, Modal, Typography } from "antd";
+import { startCase } from "lodash";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useRef } from "react";
+import { toLowerCase } from "zod";
 
 const { Text } = Typography;
-
-interface ListingModalProps {
-  isOpen: boolean;
-  handleOk: () => void;
-  handleCancel: () => void;
-  selectedListing: AppListing;
-}
 
 // Image Gallery Component
 const ImageGallery = ({
@@ -35,7 +28,6 @@ const ImageGallery = ({
         display: "flex",
         flexDirection: "column",
         gap: "16px",
-        padding: "16px",
         backgroundColor: "#fafafa",
       }}
     >
@@ -91,7 +83,15 @@ const ImageCard = ({
 };
 
 // Header Section Component
-const ListingHeader = ({ title, price }: { title: string; price: number }) => {
+const ListingHeader = ({
+  title,
+  price,
+  lister,
+}: {
+  title: string;
+  price: number;
+  lister: User;
+}) => {
   return (
     <div
       style={{
@@ -111,24 +111,32 @@ const ListingHeader = ({ title, price }: { title: string; price: number }) => {
       >
         {title}
       </h1>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "baseline",
-          gap: "4px",
-          marginTop: "8px",
-        }}
-      >
-        <Text
+      <div style={{ display: "flex", gap: "16px", alignItems: "baseline" }}>
+        <div
           style={{
-            fontSize: "20px",
-            color: "#1a1a1a",
-            fontWeight: "500",
+            display: "flex",
+            alignItems: "baseline",
+            gap: "4px",
+            marginTop: "8px",
           }}
         >
-          ${price.toLocaleString()}
-        </Text>
-        <Text style={{ color: "#666", fontSize: "14px" }}>/month</Text>
+          <Text
+            style={{
+              fontSize: "20px",
+              color: "#1a1a1a",
+              fontWeight: "500",
+            }}
+          >
+            ${price.toLocaleString()}
+          </Text>
+          <Text style={{ color: "#666", fontSize: "14px" }}>/month</Text>
+        </div>
+        <div>
+          <Text>
+            <span style={{ fontWeight: "700" }}>Posted by:&nbsp;</span>
+            {[lister.first_name, lister.last_name].filter(Boolean).join(" ")}
+          </Text>
+        </div>
       </div>
     </div>
   );
@@ -246,7 +254,7 @@ const PropertyDetails = ({
         </div>
         <div>
           <div style={{ color: "#666", marginBottom: "2px" }}>Area</div>
-          <div style={{ color: "#1a1a1a" }}>{sqft} sqft</div>
+          <div style={{ color: "#1a1a1a" }}>{sqft} sq ft</div>
         </div>
         <div>
           <div style={{ color: "#666", marginBottom: "2px" }}>Utilities</div>
@@ -281,6 +289,7 @@ const ContactButton = ({ onClick }: { onClick: () => void }) => {
         borderRadius: "6px",
         fontSize: "14px",
         fontWeight: "500",
+        paddingBottom: "1px",
       }}
       onClick={onClick}
     >
@@ -289,67 +298,89 @@ const ContactButton = ({ onClick }: { onClick: () => void }) => {
   );
 };
 
+interface ListingModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  selectedListing: AppListing;
+}
+
 // Main Modal Component
 export default function ListingModal({
   isOpen,
-  handleOk,
-  handleCancel,
+  onClose,
   selectedListing,
 }: ListingModalProps) {
+  const { isLoading, data: user } = useQuery({
+    queryKey: ["user", selectedListing.listerId],
+    queryFn: async () => {
+      const response = await getUserById(selectedListing.listerId);
+      if (response.isError) {
+        return undefined;
+      }
+
+      return response.data;
+    },
+  });
+
   return (
     <Modal
       open={isOpen}
-      onOk={handleOk}
-      onCancel={handleCancel}
-      width="85%"
-      style={{ top: "2.5%" }}
-      styles={{
-        body: {
-          padding: 0,
-          overflow: "hidden",
-        },
-      }}
+      width="85vw"
+      centered
       footer={null}
+      onCancel={onClose}
+      destroyOnHidden
     >
-      <div style={{ display: "flex", height: "85vh", overflow: "hidden" }}>
+      <div
+        onWheel={(e) => e.stopPropagation()}
+        onTouchMove={(e) => e.stopPropagation()}
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          height: "85vh",
+          gap: "24px",
+          overflow: "hidden",
+        }}
+      >
         <ImageGallery
-          imageUrls={selectedListing?.imageUrls || []}
-          title={selectedListing?.title || ""}
+          imageUrls={selectedListing.imageUrls}
+          title={selectedListing.title}
         />
 
-        {/* Details Panel */}
         <div
           style={{
             width: "50%",
-            padding: "24px",
             overflowY: "auto",
             display: "flex",
             flexDirection: "column",
             backgroundColor: "#fff",
+            paddingTop: "24px",
             fontFamily:
               "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
           }}
         >
-          <ListingHeader
-            title={selectedListing?.title || ""}
-            price={selectedListing?.price || 0}
-          />
-
+          {user && (
+            <ListingHeader
+              title={selectedListing.title}
+              price={selectedListing.price}
+              lister={user}
+            />
+          )}
           <AvailabilitySection
-            startDate={selectedListing?.startDate}
-            endDate={selectedListing?.endDate}
+            startDate={selectedListing.startDate}
+            endDate={selectedListing.endDate}
           />
-
           <PropertyDetails
-            numRoomsAvailable={selectedListing?.numRoomsAvailable || 0}
-            totalRooms={selectedListing?.totalRooms || 0}
-            propertyType={selectedListing?.propertyType || ""}
-            sqft={selectedListing?.sqft || 0}
-            utilitiesIncluded={selectedListing?.utilitiesIncluded || false}
-            location={selectedListing?.location || ""}
+            numRoomsAvailable={selectedListing.numRoomsAvailable}
+            totalRooms={selectedListing.totalRooms}
+            propertyType={startCase(
+              selectedListing.propertyType.toString().toLowerCase()
+            )}
+            sqft={selectedListing.sqft}
+            utilitiesIncluded={selectedListing.utilitiesIncluded}
+            location={startCase(selectedListing.location)}
           />
 
-          {/* Description */}
           <div
             style={{
               backgroundColor: "#fff",
@@ -381,8 +412,17 @@ export default function ListingModal({
               {selectedListing?.description}
             </p>
           </div>
-
-          <ContactButton onClick={() => alert("Contact Leaser!")} />
+          {isLoading || !user ? (
+            <Button></Button>
+          ) : (
+            <ContactButton
+              onClick={() =>
+                (window.location.href = `mailto:${user.email}?subject=${
+                  selectedListing.title + " Sublease"
+                }&body=${"Hi! I'd like to sublease your place!"}`)
+              }
+            />
+          )}
         </div>
       </div>
     </Modal>
