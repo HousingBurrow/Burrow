@@ -44,7 +44,7 @@ export default function Page() {
       user?.signOut();
       return;
     }
-    router.push("/auth/sign-up/account-information");
+    router.push("/");
   }, [user, router, app]);
 
   const handleSignIn = async (values: { email: string; password: string }) => {
