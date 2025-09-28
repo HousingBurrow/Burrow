@@ -1,6 +1,6 @@
 "use client";
 import { useCurrentUser } from "@/lib/stack";
-import { useStackApp } from "@stackframe/stack";
+import { SignUp, useStackApp } from "@stackframe/stack";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button, Divider, Form, Input, Typography, Alert, Space } from "antd";
