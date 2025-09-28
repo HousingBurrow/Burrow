@@ -6,10 +6,14 @@ import { SearchBar, searchFormSchema } from "@/components/home/search-bar";
 import { getAllListings } from "@/lib/queries/listings";
 import { AppListing } from "@/lib/schemas";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { Col, Divider, Row } from "antd";
-import { useEffect, useState } from "react";
+import { Button, Col, Divider, Row, Typography } from "antd";
+import { useState } from "react";
+import { LuBookmark } from "react-icons/lu";
 import InfiniteScroll from "react-infinite-scroll-component";
 import z from "zod";
+import Image from "next/image";
+
+const { Text } = Typography;
 
 export default function HomePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -20,8 +24,6 @@ export default function HomePage() {
   const [filterState, setFilterState] = useState<
     z.infer<typeof searchFormSchema> | undefined
   >();
-
-  useEffect(() => console.log(filterState), [filterState]);
 
   // Transform SearchBar format to getAllListings format
   const transformFilters = (
@@ -109,13 +111,43 @@ export default function HomePage() {
                       price: Number(listing.price),
                       imageUrl: listing.imageUrls[0],
                     }}
-                    onClick={() => showModal(listing)}
+                    onCardClick={() => showModal(listing)}
+                    hoverButton={
+                      <Button
+                        onClick={(e) => console.log("clicked")}
+                        style={{
+                          padding: "0",
+                          width: "32px",
+                          height: "32px",
+                          borderRadius: "calc(infinity * 1px)",
+                        }}
+                      >
+                        <LuBookmark />
+                      </Button>
+                    }
                   />
                 </Col>
               ))}
           </Row>
         ) : (
-          <p style={{ textAlign: "center" }}>Loading...</p>
+          <div
+            style={{
+              width: "100%",
+              height: "100%",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              flexDirection: "column",
+            }}
+          >
+            <Image
+              src="/standing-prairie-dog.png"
+              height={320}
+              width={320}
+              alt="images"
+            />
+            <Text strong>Contemplating...</Text>
+          </div>
         )}
       </InfiniteScroll>
 
