@@ -3,10 +3,14 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Form, Input, Select, InputNumber, Button, Card, Typography, message } from "antd";
+import { useMutation } from "@tanstack/react-query";
+import { createUser } from "@/lib/queries/users";
+import { initial } from "lodash";
 
 const { Title } = Typography;
 
 interface AccountFormValues {
+  email: string;
   firstName: string;
   lastName: string;
   gender: string;
@@ -26,34 +30,32 @@ export default function AccountInformationPage({ initialEmail }: AccountInformat
   }, [form, initialEmail]);
 
   const handleSubmit = async (values: AccountFormValues) => {
-    try {
-      const response = await fetch("/api/users/create", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: initialEmail,
-          firstName: values.firstName,
-          lastName: values.lastName,
-          gender: values.gender,
-          age: Number(values.age),
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        message.error(errorData.message || "Failed to create user.");
-        return;
-      }
-
-      message.success("User created successfully!");
-      router.push("/app"); // redirect after success
-    } catch (error) {
-      console.error("Error creating user:", error);
-      message.error("An unexpected error occurred.");
-    }
+    createUserMutation.mutate(values)
   };
+
+  const createUserMutation = useMutation({
+    mutationFn: async (values: AccountFormValues) => {
+      const response = await createUser({
+        email: values.email,
+        firstName: values.firstName,
+        lastName: values.lastName,
+        gender: values.gender,
+        age: Number(values.age),
+      })
+
+      if (response.isError) {
+        message.error("Failed to create user.");
+        throw new Error(response.message);
+      }
+    },
+    onSuccess: () => {
+      console.log("User created successfully");
+      router.push("/")
+    },
+    onError: () => {
+      console.error("Error creating user");
+    }
+  })
 
   return (
     <div style={{ display: "flex", justifyContent: "center", padding: 50 }}>
@@ -67,7 +69,7 @@ export default function AccountInformationPage({ initialEmail }: AccountInformat
           onFinish={handleSubmit}
           initialValues={{ gender: "other", email: initialEmail }}
         >
-          <Form.Item label="Email" name="email">
+          <Form.Item label="Email" name="email" rules={[{ required: true, message: "Please input your email!" }]}>
             <Input placeholder="Enter email" />
           </Form.Item>
 
