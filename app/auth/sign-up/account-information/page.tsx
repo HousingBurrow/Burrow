@@ -45,14 +45,6 @@ export default function AccountInformationPage({
   const [countdown, setCountdown] = useState(0);
   const [currentEmail, setCurrentEmail] = useState(initialEmail);
 
-  // Add user loading check
-  useEffect(() => {
-    console.log("Current user:", user);
-    if (user) {
-      console.log("User loaded:", user.id);
-    }
-  }, [user]);
-
   useEffect(() => {
     form.setFieldsValue({ gender: "other", email: initialEmail });
     setCurrentEmail(initialEmail);
