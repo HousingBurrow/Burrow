@@ -1,23 +1,49 @@
 import { NextResponse } from 'next/server'
 import { StackServerApp } from '@stackframe/stack'
+// If your SDK exports a proper type for the user, you can also:
+// import type { CurrentUser } from '@stackframe/stack'
+
+type MaybeEmailUser = {
+  primaryEmail?: string | { email?: string }
+  email?: string
+  emails?: Array<{ email?: string }>
+}
+
+function extractEmail(obj: unknown): string | null {
+  const u = obj as MaybeEmailUser
+
+  // primaryEmail can be a string or an object with { email }
+  if (typeof u.primaryEmail === 'string' && u.primaryEmail) {
+    return u.primaryEmail
+  }
+  if (u.primaryEmail && typeof u.primaryEmail === 'object' && u.primaryEmail.email) {
+    return u.primaryEmail.email || null
+  }
+
+  // some SDKs expose a direct email
+  if (typeof u.email === 'string' && u.email) {
+    return u.email
+  }
+
+  // or an array of emails
+  if (Array.isArray(u.emails) && u.emails.length > 0) {
+    const first = u.emails[0]
+    if (first?.email) return first.email
+  }
+
+  return null
+}
 
 export async function GET() {
   try {
     const stack = new StackServerApp({ tokenStore: 'nextjs-cookie' })
-    const u = await stack.getUser({ or: 'return-null' })
+    const user = await stack.getUser({ or: 'return-null' })
 
-    if (!u) {
+    if (!user) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
     }
 
-    // primaryEmail can be a string in some SDK versions. Be defensive.
-    const primary = (u as any).primaryEmail
-    const email =
-      (typeof primary === 'string' ? primary : primary?.email) ??
-      // fallbacks if your SDK exposes email in a different place
-      (u as any).email ??
-      (Array.isArray((u as any).emails) ? (u as any).emails[0]?.email : undefined)
-
+    const email = extractEmail(user)
     if (!email) {
       return NextResponse.json({ error: 'No email on user' }, { status: 400 })
     }
