@@ -2,7 +2,7 @@
 
 import ListingCard from "@/components/home/listing-card";
 import ListingModal from "@/components/home/listing-modal";
-import { getSavedListingsForUser, getUserByAuthId } from "@/lib/queries/users";
+import { getOwnListingsForUser, getUserByAuthId } from "@/lib/queries/users";
 import { AppListing } from "@/lib/schemas";
 import { useCurrentUser } from "@/lib/stack";
 import { useQuery } from "@tanstack/react-query";
@@ -31,11 +31,11 @@ export default function MyListingsPage() {
     enabled: !!user,
   });
 
-  const { data: savedListings = [], isLoading } = useQuery({
-    queryKey: ["savedListings", dbUser?.id],
+  const { data: ownListings = [], isLoading } = useQuery({
+    queryKey: ["ownListings", dbUser?.id],
     queryFn: async () => {
       if (dbUser) {
-        const response = await getSavedListingsForUser(dbUser.id);
+        const response = await getOwnListingsForUser(dbUser.id);
         if (response.isError) {
           return undefined;
         }
@@ -65,11 +65,11 @@ export default function MyListingsPage() {
     <div style={{ padding: 24 }}>
       <Title level={3}>My Listings</Title>
 
-      {!savedListings.length ? (
+      {!ownListings.length ? (
         <Text type="secondary">No saved listings found.</Text>
       ) : (
         <Row gutter={[16, 16]} style={{ padding: "32px 0" }}>
-          {savedListings.map((listing) => (
+          {ownListings.map((listing) => (
             <Col key={listing.id} xs={24} sm={12} md={8} lg={6}>
               <ListingCard
                 listing={{
