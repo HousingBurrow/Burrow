@@ -1,11 +1,21 @@
 "use client";
-
-import { SignUp, useUser } from "@stackframe/stack";
+import { useCurrentUser } from "@/lib/stack";
+import { useStackApp } from "@stackframe/stack";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { Button, Divider, Form, Input, Typography, Alert, Space } from "antd";
+import {
+  GithubOutlined,
+  GoogleOutlined,
+  MailOutlined,
+  LockOutlined,
+} from "@ant-design/icons";
+
+const { Title, Text, Link } = Typography;
 
 export default function Page() {
-  const user = useUser();
+  const app = useStackApp();
+  const user = useCurrentUser();
   const router = useRouter();
 
   return <SignUp fullPage />;

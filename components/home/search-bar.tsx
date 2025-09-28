@@ -71,9 +71,9 @@ export const SearchBar = ({ onSearchClicked }: SearchBarProps) => {
         style={{
           display: "flex",
           alignItems: "center",
-          background: "#fff",
-          borderRadius: 999,
-          padding: "8px 12px",
+          background: "#DCCFC0",
+          borderRadius: 10,
+          padding: "12px 20px",
           boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
           gap: 8,
           minWidth: 600,
