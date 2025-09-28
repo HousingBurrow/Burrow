@@ -38,7 +38,7 @@ export const HouseDetailsSchema = z.object({
 
 // Listing schema
 export const ListingSchema = z.object({
-  id: z.number().int().optional(),
+  id: z.number().int(),
   title: z.string(),
   address: z.string(),
   description: z.string(),
@@ -65,4 +65,4 @@ export const ListingSchema = z.object({
   listerId: z.number().int(),
 });
 
-export type AppListing = z.infer<typeof ListingSchema>
+export type AppListing = z.infer<typeof ListingSchema>;

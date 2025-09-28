@@ -43,16 +43,16 @@ enum Location {
 }
 
 model User {
-  id         Int       @id @default(autoincrement())
-  stack_auth_id String?  @unique  // Link to Stack Auth user
-  email      String    @unique
-  first_name String
-  last_name  String
-  gender     String
-  age        Int
-  listings   Listing[]
+  id            Int       @id @default(autoincrement())
+  auth_id       String    @unique // Link to Stack Auth user
+  email         String    @unique
+  first_name    String
+  last_name     String
+  gender        String
+  age           Int
+  listings      Listing[]
   savedListings Saved[]
-  pfp      String
+  pfp           String
 
   @@index([last_name])
 }
@@ -83,8 +83,8 @@ model Listing {
   houseDetails     HouseDetails?
 
   lister_id Int
-  lister    User @relation(fields: [lister_id], references: [id], onDelete: Cascade)
-  savedBy       Saved[]
+  lister    User    @relation(fields: [lister_id], references: [id], onDelete: Cascade)
+  savedBy   Saved[]
 
   @@index([lister_id])
   @@index([property_type])
@@ -107,17 +107,14 @@ model HouseDetails {
   num_rooms     Int
 }
 
-
-
-
 model Saved {
   // Composite primary key: prevents duplicates inherently
-  userId     Int
-  listingId  Int
-  createdAt  DateTime @default(now())
+  userId    Int
+  listingId Int
+  createdAt DateTime @default(now())
 
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  listing    Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
 
   @@id([userId, listingId]) // composite PK (or use @@unique if you prefer an int id)
   @@index([userId])

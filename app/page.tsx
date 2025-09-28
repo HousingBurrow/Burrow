@@ -5,13 +5,19 @@ import ListingModal from "@/components/home/listing-modal";
 import { SearchBar, searchFormSchema } from "@/components/home/search-bar";
 import { getAllListings } from "@/lib/queries/listings";
 import { AppListing } from "@/lib/schemas";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query";
 import { Button, Col, Divider, Row, Typography } from "antd";
 import { useState } from "react";
 import { LuBookmark } from "react-icons/lu";
 import InfiniteScroll from "react-infinite-scroll-component";
 import z from "zod";
 import Image from "next/image";
+import {
+  getSavedListingsForUser,
+  getUserByAuthId,
+  toggleSaveListing,
+} from "@/lib/queries/users";
+import { useUser } from "@stackframe/stack";
 
 const { Text } = Typography;
 
@@ -24,6 +30,8 @@ export default function HomePage() {
   const [filterState, setFilterState] = useState<
     z.infer<typeof searchFormSchema> | undefined
   >();
+
+  const user = useUser();
 
   // Transform SearchBar format to getAllListings format
   const transformFilters = (
@@ -45,7 +53,7 @@ export default function HomePage() {
     data: listings,
     fetchNextPage,
     hasNextPage,
-    isFetching,
+    isLoading,
     isFetchingNextPage,
   } = useInfiniteQuery({
     queryKey: ["listings", JSON.stringify(filterState)],
@@ -63,6 +71,53 @@ export default function HomePage() {
     },
     getNextPageParam: (lastPage) => lastPage.nextCursor,
     initialPageParam: undefined,
+  });
+
+  const { data: dbUser } = useQuery({
+    queryKey: ["signedInUser"],
+    queryFn: async () => {
+      if (user) {
+        const response = await getUserByAuthId(user.id);
+        if (response.isError) {
+          return undefined;
+        }
+
+        return response.data;
+      } else {
+        return undefined;
+      }
+    },
+  });
+
+  const { data: savedListingsIds } = useQuery({
+    queryKey: ["savedListings", dbUser],
+    queryFn: async () => {
+      if (dbUser) {
+        const response = await getSavedListingsForUser(dbUser.id);
+        if (response.isError) {
+          return undefined;
+        }
+
+        const listingIds = response.data.map(({ id }) => id);
+        const listingIdsSet = new Set(listingIds);
+
+        return listingIdsSet;
+      } else {
+        return undefined;
+      }
+    },
+  });
+
+  const toggleMutation = useMutation({
+    mutationFn: async ({
+      userId,
+      listingId,
+    }: {
+      userId: number;
+      listingId: number;
+    }) => await toggleSaveListing(userId, listingId),
+    onSuccess: () => {},
+    onError: () => {},
   });
 
   const showModal = (listing: AppListing) => {
@@ -98,7 +153,7 @@ export default function HomePage() {
         scrollThreshold={0.9} // triggers when 90% of page scrolled
         style={{ width: "100%" }}
       >
-        {listings ? (
+        {listings && !isLoading ? (
           <Row gutter={[16, 16]} style={{ padding: "32px", width: "100%" }}>
             {listings.pages
               .flatMap((page) => page.data)
@@ -114,7 +169,14 @@ export default function HomePage() {
                     onCardClick={() => showModal(listing)}
                     hoverButton={
                       <Button
-                        onClick={(e) => console.log("clicked")}
+                        onClick={() => {
+                          if (dbUser) {
+                            toggleMutation.mutate({
+                              userId: dbUser.id,
+                              listingId: listing.id,
+                            });
+                          }
+                        }}
                         style={{
                           padding: "0",
                           width: "32px",
@@ -122,7 +184,13 @@ export default function HomePage() {
                           borderRadius: "calc(infinity * 1px)",
                         }}
                       >
-                        <LuBookmark />
+                        <LuBookmark
+                          color={
+                            savedListingsIds?.has(listing.id)
+                              ? "yellow"
+                              : undefined
+                          }
+                        />
                       </Button>
                     }
                   />
@@ -146,7 +214,7 @@ export default function HomePage() {
               width={320}
               alt="images"
             />
-            <Text strong>Contemplating...</Text>
+            <Text strong>Nothing to see here...</Text>
           </div>
         )}
       </InfiniteScroll>
