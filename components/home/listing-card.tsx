@@ -1,5 +1,5 @@
 import React, { FC } from "react";
-import { Card, Typography, Button } from "antd";
+import { Card, Typography } from "antd";
 import Image from "next/image";
 import { startCase } from "lodash";
 
@@ -12,21 +12,35 @@ export interface ListingCardProps {
     location: string;
     price: number;
   };
-  onViewDetails?: () => void;
+  onClick: () => void;
 }
 
-const ListingCard: FC<ListingCardProps> = ({ listing, onViewDetails }) => {
+const ListingCard: FC<ListingCardProps> = ({ listing, onClick }) => {
   const { title: title, imageUrl, location, price } = listing;
   return (
     <Card
       hoverable
+      style={{
+        borderRadius: "8px",
+      }}
+      onClick={onClick}
       cover={
-        <div style={{ position: 'relative', width: '100%', height: 200 }}>
-          <Image 
-            alt={title} 
-            src={imageUrl} 
+        <div
+          style={{
+            position: "relative",
+            width: "100%",
+            height: 200,
+            borderRadius: "8px",
+            borderBottomRightRadius: "0px",
+            borderBottomLeftRadius: "0",
+            overflow: "hidden",
+          }}
+        >
+          <Image
+            alt={title}
+            src={imageUrl}
             fill
-            style={{ objectFit: 'cover' }}
+            style={{ objectFit: "cover" }}
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             quality={85}
           />
@@ -37,18 +51,6 @@ const ListingCard: FC<ListingCardProps> = ({ listing, onViewDetails }) => {
       <Text type="secondary">{startCase(location)}</Text>
       <br />
       <Text strong>{`$${price.toString()}`}</Text>
-      {onViewDetails && (
-        <>
-          <br />
-          <Button
-            type="primary"
-            style={{ marginTop: 8 }}
-            onClick={onViewDetails}
-          >
-            View Details
-          </Button>
-        </>
-      )}
     </Card>
   );
 };

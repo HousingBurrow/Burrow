@@ -1,31 +1,33 @@
 "use client";
+"use client";
 
 import React, { useState, useTransition } from "react";
 import {
+  Avatar,
+  Button,
+  Card,
+  Col,
   Form,
   Input,
-  Select,
-  Switch,
-  Button,
-  Avatar,
-  Typography,
-  Card,
   message,
-  Tabs,
-  Space,
   Row,
-  Col,
+  Select,
+  Space,
+  Switch,
+  Tabs,
+  Typography,
 } from "antd";
 import {
-  FiUser,
-  FiSettings,
   FiBell,
-  FiShield,
   FiCamera,
+  FiSettings,
+  FiShield,
   FiTrash2,
+  FiUser,
 } from "react-icons/fi";
 import { updateUser, deleteUser } from "@/lib/queries/users";
 import "./settings.css";
+import { useUser } from "@stackframe/stack";
 
 const { Title, Text } = Typography;
 const { TabPane } = Tabs;
@@ -90,7 +92,6 @@ export default function ClientSettings({
     });
   };
 
-  // ------------------- Delete user -------------------
   const handleDelete = async () => {
     const confirm = window.confirm(
       "Are you sure you want to delete your account? This action is irreversible."
