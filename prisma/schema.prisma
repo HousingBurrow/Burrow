@@ -51,6 +51,8 @@ model User {
   gender     String
   age        Int
   listings   Listing[]
+  savedListings Saved[]
+  pfp      String
 
   @@index([last_name])
 }
@@ -82,6 +84,7 @@ model Listing {
 
   lister_id Int
   lister    User @relation(fields: [lister_id], references: [id], onDelete: Cascade)
+  savedBy       Saved[]
 
   @@index([lister_id])
   @@index([property_type])
@@ -102,4 +105,21 @@ model HouseDetails {
   listing       Listing @relation(fields: [listing_id], references: [id], onDelete: Cascade)
   num_bathrooms Decimal
   num_rooms     Int
+}
+
+
+
+
+model Saved {
+  // Composite primary key: prevents duplicates inherently
+  userId     Int
+  listingId  Int
+  createdAt  DateTime @default(now())
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listing    Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@id([userId, listingId]) // composite PK (or use @@unique if you prefer an int id)
+  @@index([userId])
+  @@index([listingId])
 }

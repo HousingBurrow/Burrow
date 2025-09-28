@@ -1,15 +1,17 @@
 "use server";
 
-import { User } from "@prisma/client";
+import { Prisma, User } from "@prisma/client";
 import { ActionResult } from "../utils/action-result";
 import { prisma } from "../../lib/prisma";
 
 interface CreateUserProps {
+  // auth: string;
   email: string;
   firstName: string;
   lastName: string;
   gender: string;
   age: number;
+  pfp: string;
 }
 
 export async function createUser({
@@ -18,6 +20,8 @@ export async function createUser({
   lastName,
   gender,
   age,
+  // auth,
+  pfp,
 }: CreateUserProps): ActionResult<User> {
   try {
     const user = await prisma.user.create({
@@ -27,6 +31,8 @@ export async function createUser({
         last_name: lastName,
         gender: gender,
         age: age,
+        pfp: pfp,
+        // stack_auth_id: auth,
       },
     });
 
@@ -92,5 +98,56 @@ export async function getUserByEmail(email: string) {
     return { isError: false, data: user ?? null };
   } catch (e) {
     return { isError: true, message: (e as Error).message };
+  }
+}
+
+export async function saveListing(userId: number, listingId: number): ActionResult<boolean> {
+  try {
+    await prisma.saved.create({
+      data: { userId, listingId },
+    });
+    return { isError: false, data: true };
+  } catch (e) {
+    console.log("Error when saving listing", e);
+    return {isError: true, message: (e as Error).message};
+  }
+}
+
+export async function unsaveListing(userId: number, listingId: number): ActionResult<boolean> {
+  try {
+    await prisma.saved.delete({
+      where: { userId_listingId: { userId, listingId } },
+    });
+    return { isError: false, data: true };
+  } catch (e) {
+    console.log("Error when unsaving a listing", e);
+    return { isError: true, message: (e as Error).message ?? 'Failed to unsave listing' };
+  }
+}
+
+export async function toggleSaveListing(userId: number, listingId: number): Promise<ActionResult<{ saved: boolean }>> {
+  try {
+    await prisma.saved.create({ data: { userId, listingId } });
+    return { isError: false, data: { saved: true } };
+  } catch (e: unknown) {
+    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
+      await prisma.saved.delete({ where: { userId_listingId: { userId, listingId } } });
+      return { isError: false, data: { saved: false } };
+    }
+    const message = e instanceof Error ? e.message : 'Failed to toggle save';
+    return { isError: true, message };
+  }
+}
+
+export async function getSavedListingsForUser(userId: number) {
+  try {
+    const rows = await prisma.saved.findMany({
+      where: { userId },
+      include: { listing: true },
+      orderBy: { createdAt: 'desc' },
+    });
+    return { isError: false, data: rows.map(r => r.listing) };
+  } catch (e: unknown) {
+    return { isError: true, message: (e as Error).message ?? 'Failed to load saved listings' };
   }
 }

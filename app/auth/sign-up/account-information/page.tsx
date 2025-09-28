@@ -6,6 +6,7 @@ import { Form, Input, Select, InputNumber, Button, Card, Typography, message } f
 import { useMutation } from "@tanstack/react-query";
 import { createUser } from "@/lib/queries/users";
 import { initial } from "lodash";
+import { useUser } from "@stackframe/stack";
 
 const { Title } = Typography;
 
@@ -24,6 +25,7 @@ interface AccountInformationPageProps {
 export default function AccountInformationPage({ initialEmail }: AccountInformationPageProps) {
   const [form] = Form.useForm();
   const router = useRouter();
+  const user = useUser();
 
   useEffect(() => {
     form.setFieldsValue({ gender: "other", email: initialEmail });
@@ -41,6 +43,7 @@ export default function AccountInformationPage({ initialEmail }: AccountInformat
         lastName: values.lastName,
         gender: values.gender,
         age: Number(values.age),
+        pfp: "",
       })
 
       if (response.isError) {
