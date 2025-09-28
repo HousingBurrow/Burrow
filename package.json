@@ -21,7 +21,7 @@
     "@emotion/styled": "^11.14.1",
     "@hookform/resolvers": "^5.2.2",
     "@prisma/client": "^6.16.2",
-    "@stackframe/stack": "^2.8.40",
+    "@stackframe/stack": "^2.8.41",
     "@tanstack/react-query-devtools": "^5.90.2",
     "@vercel/blob": "^2.0.0",
     "antd": "^5.27.4",
