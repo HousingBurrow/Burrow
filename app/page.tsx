@@ -121,7 +121,9 @@ export default function HomePage() {
     onSuccess: () => {
       refetchSavedListingsIds();
     },
-    onError: () => {},
+    onError: (error) => {
+      console.error("bad stuff happened", error);
+    },
   });
 
   const showModal = (listing: AppListing) => {
