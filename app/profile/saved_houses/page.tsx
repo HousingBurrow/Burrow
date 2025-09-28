@@ -3,12 +3,17 @@
 import ListingCard from "@/components/home/listing-card";
 import ListingModal from "@/components/home/listing-modal";
 import { getListingById } from "@/lib/queries/listings";
-import { getSavedListingsForUser, getUserByAuthId } from "@/lib/queries/users";
+import {
+  getSavedListingsForUser,
+  getUserByAuthId,
+  toggleSaveListing,
+} from "@/lib/queries/users";
 import { AppListing } from "@/lib/schemas";
 import { useCurrentUser } from "@/lib/stack";
-import { useQuery } from "@tanstack/react-query";
-import { Col, Row, Typography, Spin } from "antd";
-import { useState } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { Col, Row, Typography, Spin, Button } from "antd";
+import { useMemo, useState } from "react";
+import { LuBookmark } from "react-icons/lu";
 
 const { Title, Text } = Typography;
 
@@ -32,7 +37,11 @@ export default function SavedListings() {
     enabled: !!user,
   });
 
-  const { data: savedListings = [], isLoading } = useQuery({
+  const {
+    data: savedListings = [],
+    isLoading,
+    refetch,
+  } = useQuery({
     queryKey: ["savedListings", dbUser?.id],
     queryFn: async () => {
       if (dbUser) {
@@ -46,6 +55,27 @@ export default function SavedListings() {
       }
     },
     enabled: !!dbUser,
+  });
+
+  const savedListingsIds = useMemo(
+    () => new Set(savedListings.map(({ id }) => id)),
+    [savedListings]
+  );
+
+  const toggleMutation = useMutation({
+    mutationFn: async ({
+      userId,
+      listingId,
+    }: {
+      userId: number;
+      listingId: number;
+    }) => await toggleSaveListing(userId, listingId),
+    onSuccess: () => {
+      refetch();
+    },
+    onError: (error) => {
+      console.error("bad stuff happened", error);
+    },
   });
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -80,6 +110,35 @@ export default function SavedListings() {
                   imageUrl: listing.imageUrls[0],
                 }}
                 onCardClick={() => showModal(listing)}
+                hoverButton={
+                  dbUser && savedListingsIds ? (
+                    <Button
+                      onClick={() => {
+                        toggleMutation.mutate({
+                          userId: dbUser.id,
+                          listingId: listing.id,
+                        });
+                      }}
+                      style={{
+                        padding: "0",
+                        width: "32px",
+                        height: "32px",
+                        borderRadius: "calc(infinity * 1px)",
+                      }}
+                    >
+                      <LuBookmark
+                        color={
+                          savedListingsIds.has(listing.id)
+                            ? "#FFD700"
+                            : "currentColor"
+                        }
+                        fill={
+                          savedListingsIds.has(listing.id) ? "#FFD700" : "none"
+                        }
+                      />
+                    </Button>
+                  ) : undefined
+                }
               />
             </Col>
           ))}
