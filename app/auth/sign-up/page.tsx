@@ -83,7 +83,7 @@ export default function Page() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        backgroundColor: "#f3f4f6",
+        backgroundColor: "#DCCFC0",
         height: "85vh",
       }}
     >
