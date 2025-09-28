@@ -11,7 +11,7 @@ import { toLowerCase } from "zod";
 
 const { Text } = Typography;
 
-// Image Gallery Component
+// Image Gallery Component - Remove ALL height constraints
 const ImageGallery = ({
   imageUrls,
   title,
@@ -23,12 +23,12 @@ const ImageGallery = ({
     <div
       style={{
         width: "50%",
-        height: "100%",
         overflowY: "auto",
         display: "flex",
         flexDirection: "column",
         gap: "16px",
         backgroundColor: "#fafafa",
+        maxHeight: "85vh", // Instead of fixed height, use maxHeight to allow natural sizing
       }}
     >
       {imageUrls?.map((img, idx) => (
@@ -43,7 +43,7 @@ const ImageGallery = ({
   );
 };
 
-// Individual Image Card Component
+// Individual Image Card Component - Let image determine height completely
 const ImageCard = ({
   src,
   alt,
@@ -56,31 +56,27 @@ const ImageCard = ({
   return (
     <div
       style={{
-        position: "relative",
         borderRadius: "6px",
         overflow: "hidden",
-        minHeight: "400px",
         border: "1px solid #e5e5e5",
+        flexShrink: 0, // Prevent the container from shrinking
       }}
     >
-      <Image
+      <img
         src={src}
         alt={alt}
-        width={1600}
-        height={1067}
-        sizes="(max-width: 768px) 100vw, 60vw"
-        quality={75}
         style={{
           width: "100%",
           height: "auto",
-          minHeight: "400px",
-          objectFit: "cover",
+          display: "block",
         }}
-        priority={priority}
+        loading={priority ? "eager" : "lazy"}
       />
     </div>
   );
 };
+
+
 
 // Header Section Component
 const ListingHeader = ({
@@ -337,7 +333,8 @@ export default function ListingModal({
         style={{
           display: "flex",
           flexDirection: "row",
-          height: "85vh",
+          minHeight: "85vh",
+          maxHeight: "none", // Remove max height constraint
           gap: "24px",
           overflow: "hidden",
         }}
