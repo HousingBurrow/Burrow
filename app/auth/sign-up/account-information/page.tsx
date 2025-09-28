@@ -14,8 +14,8 @@ import {
 } from "antd";
 import { useMutation } from "@tanstack/react-query";
 import { createUser } from "@/lib/queries/users";
-import { initial } from "lodash";
 import { useUser } from "@stackframe/stack";
+import { useCurrentUser } from "@/lib/stack";
 
 const { Title } = Typography;
 
@@ -36,7 +36,7 @@ export default function AccountInformationPage({
 }: AccountInformationPageProps) {
   const [form] = Form.useForm();
   const router = useRouter();
-  const user = useUser();
+  const user = useCurrentUser();
 
   useEffect(() => {
     form.setFieldsValue({ gender: "other", email: initialEmail });
@@ -63,8 +63,9 @@ export default function AccountInformationPage({
           message.error("Failed to create user.");
           throw new Error(response.message);
         }
+      } else {
+        throw new Error("No user id");
       }
-      throw new Error("No user id");
     },
     onSuccess: () => {
       console.log("User created successfully");

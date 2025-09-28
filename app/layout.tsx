@@ -7,7 +7,6 @@ import { Suspense } from "react";
 import { Header } from "@/components/header";
 import { stackServerApp } from "@/stack/server"; // server-only
 import "./globals.css";
-import Loading from "./loading";
 
 export const metadata = {
   title: "Burrow",
