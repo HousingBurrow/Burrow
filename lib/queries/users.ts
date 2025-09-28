@@ -3,6 +3,7 @@
 import { Listing, User } from "@prisma/client";
 import { prisma } from "../../lib/prisma";
 import { ActionResult } from "../utils/action-result";
+import { AppListing } from "../schemas";
 
 interface CreateUserProps {
   authId: string;
@@ -218,14 +219,39 @@ export async function toggleSaveListing(
 
 export async function getSavedListingsForUser(
   userId: number
-): ActionResult<Listing[]> {
+): ActionResult<AppListing[]> {
   try {
     const rows = await prisma.saved.findMany({
       where: { userId },
       include: { listing: true },
       orderBy: { createdAt: "desc" },
     });
-    return { isError: false, data: rows.map((r) => r.listing) };
+
+    const cleaned = rows.map(
+      ({ listing: rawListing }) =>
+        ({
+          id: rawListing.id,
+          title: rawListing.title,
+          address: rawListing.address,
+          description: rawListing.description,
+          propertyType: rawListing.property_type,
+          location: rawListing.location,
+          distanceInMiles: Number(rawListing.distance_in_miles),
+          price: Number(rawListing.price),
+          numRoomsAvailable: rawListing.num_rooms_available,
+          totalRooms: rawListing.total_rooms,
+          numberRoommates: rawListing.number_roommates,
+          utilitiesIncluded: rawListing.utilities_included,
+          sqft: rawListing.sqft,
+          imageUrls: rawListing.imageUrls,
+          startDate: rawListing.start_date,
+          endDate: rawListing.end_date,
+          createdAt: rawListing.created_at,
+          updatedAt: rawListing.updated_at,
+          listerId: rawListing.lister_id,
+        } as AppListing)
+    );
+    return { isError: false, data: cleaned };
   } catch (e: unknown) {
     return {
       isError: true,

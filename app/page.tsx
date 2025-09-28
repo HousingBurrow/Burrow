@@ -89,24 +89,26 @@ export default function HomePage() {
     },
   });
 
-  const { data: savedListingsIds } = useQuery({
-    queryKey: ["savedListings", dbUser],
-    queryFn: async () => {
-      if (dbUser) {
-        const response = await getSavedListingsForUser(dbUser.id);
-        if (response.isError) {
+  const { data: savedListingsIds, refetch: refetchSavedListingsIds } = useQuery(
+    {
+      queryKey: ["savedListings", dbUser],
+      queryFn: async () => {
+        if (dbUser) {
+          const response = await getSavedListingsForUser(dbUser.id);
+          if (response.isError) {
+            return undefined;
+          }
+
+          const listingIds = response.data.map(({ id }) => id);
+          const listingIdsSet = new Set(listingIds);
+
+          return listingIdsSet;
+        } else {
           return undefined;
         }
-
-        const listingIds = response.data.map(({ id }) => id);
-        const listingIdsSet = new Set(listingIds);
-
-        return listingIdsSet;
-      } else {
-        return undefined;
-      }
-    },
-  });
+      },
+    }
+  );
 
   const toggleMutation = useMutation({
     mutationFn: async ({
@@ -116,7 +118,9 @@ export default function HomePage() {
       userId: number;
       listingId: number;
     }) => await toggleSaveListing(userId, listingId),
-    onSuccess: () => {},
+    onSuccess: () => {
+      refetchSavedListingsIds();
+    },
     onError: () => {},
   });
 
@@ -168,30 +172,35 @@ export default function HomePage() {
                     }}
                     onCardClick={() => showModal(listing)}
                     hoverButton={
-                      <Button
-                        onClick={() => {
-                          if (dbUser) {
+                      dbUser ? (
+                        <Button
+                          onClick={() => {
                             toggleMutation.mutate({
                               userId: dbUser.id,
                               listingId: listing.id,
                             });
-                          }
-                        }}
-                        style={{
-                          padding: "0",
-                          width: "32px",
-                          height: "32px",
-                          borderRadius: "calc(infinity * 1px)",
-                        }}
-                      >
-                        <LuBookmark
-                          color={
-                            savedListingsIds?.has(listing.id)
-                              ? "yellow"
-                              : undefined
-                          }
-                        />
-                      </Button>
+                          }}
+                          style={{
+                            padding: "0",
+                            width: "32px",
+                            height: "32px",
+                            borderRadius: "calc(infinity * 1px)",
+                          }}
+                        >
+                          <LuBookmark
+                            color={
+                              savedListingsIds?.has(listing.id)
+                                ? "#FFD700"
+                                : "currentColor"
+                            }
+                            fill={
+                              savedListingsIds?.has(listing.id)
+                                ? "#FFD700"
+                                : "none"
+                            }
+                          />
+                        </Button>
+                      ) : undefined
                     }
                   />
                 </Col>
