@@ -58,7 +58,7 @@ export default function MyListingsPage() {
                   price: Number(listing.price),
                   imageUrl: listing.imageUrls[0],
                 }}
-                onViewDetails={() => showModal(listing)}
+                onClick={() => showModal(listing)}
               />
             </Col>
           ))}
@@ -68,8 +68,7 @@ export default function MyListingsPage() {
       {selectedListing && (
         <ListingModal
           isOpen={isModalOpen}
-          handleCancel={handleCancel}
-          handleOk={handleOk}
+          onClose={handleCancel}
           selectedListing={selectedListing}
         />
       )}

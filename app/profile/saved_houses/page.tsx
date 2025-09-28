@@ -68,8 +68,7 @@ export default function MyListingsPage() {
       {selectedListing && (
         <ListingModal
           isOpen={isModalOpen}
-          handleCancel={handleCancel}
-          handleOk={handleOk}
+          onClose={handleCancel}
           selectedListing={selectedListing}
         />
       )}
