@@ -2,12 +2,19 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Layout, Menu } from 'antd'
+import { Layout } from 'antd'
 
 const { Sider, Content } = Layout
 
 export default function ProfileLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
+
+  const links = [
+    { key: 'about', label: 'About Me', href: '/profile/about_me' },
+    { key: 'saved', label: 'Saved Houses', href: '/profile/saved_houses' },
+    { key: 'listings', label: 'My Listings', href: '/profile/my_listings' },
+  ]
+
   const selectedKey = pathname.startsWith('/profile/saved_houses')
     ? 'saved'
     : pathname.startsWith('/profile/my_listings')
@@ -19,29 +26,42 @@ export default function ProfileLayout({ children }: { children: React.ReactNode 
       <Layout>
         {/* Sidebar */}
         <Sider
-          width={220}
+          width={240}
           style={{
             background: '#DCCFC0',
-            borderRight: '1px solid #DCCFC0',
-            paddingTop: 8,
+            borderRight: '1px solid #c2b6a6',
+            padding: '24px 16px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '16px',
           }}
         >
-          <Menu
-            mode="inline"
-            selectedKeys={[selectedKey]}
-            items={[
-                { key: 'about', label: <Link href="/profile/about_me">About Me</Link> },
-                { key: 'saved', label: <Link href="/profile/saved_houses">Saved Houses</Link> },
-                { key: 'listings', label: <Link href="/profile/my_listings">My Listings</Link> },
-            ]}
-          />
+          {links.map(link => (
+            <Link
+              key={link.key}
+              href={link.href}
+              style={{
+                padding: '12px 16px',
+                borderRadius: '8px',
+                background: selectedKey === link.key ? '#b8a999' : 'transparent',
+                color: selectedKey === link.key ? '#fff' : '#2c2c2c',
+                fontWeight: selectedKey === link.key ? 600 : 500,
+                textDecoration: 'none',
+                fontSize: '16px',
+                transition: 'all 0.25s ease',
+                display: 'block',
+              }}
+            >
+              {link.label}
+            </Link>
+          ))}
         </Sider>
 
-        {/* Full-width content area */}
+        {/* Content area */}
         <Content
           style={{
-            background: '#DCCFC0',
-            padding: 24,
+            background: '#DCCFC0', // same as sidebar
+            padding: 32,
             minHeight: '100%',
           }}
         >
