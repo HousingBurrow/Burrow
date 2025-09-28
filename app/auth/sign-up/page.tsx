@@ -8,11 +8,5 @@ export default function Page() {
   const user = useUser();
   const router = useRouter();
 
-  useEffect(() => {
-    if (user) {
-      router.push("/account-information");
-    }
-  }, [user, router]);
-
   return <SignUp fullPage />;
 }
