@@ -259,3 +259,87 @@ export async function getSavedListingsForUser(
     };
   }
 }
+
+
+// get listings by user
+// change function name
+
+export async function getOwnListingsForUser(userId: number): ActionResult<AppListing[]> {
+  try {
+    const listings = await prisma.listing.findMany({
+      where: {
+        lister_id: userId,
+      },
+      include: {
+        apartmentDetails: true,
+        houseDetails: true,
+        lister: {
+          select: {
+            id: true,
+            first_name: true,
+            last_name: true,
+            email: true,
+          },
+        },
+        _count: {
+          select: {
+            savedBy: true, // Count how many users saved this listing
+          },
+        },
+      },
+      orderBy: {
+        created_at: "desc", // Most recent first
+      },
+    });
+
+    const cleaned = listings.map((rawListing) => ({
+      id: rawListing.id,
+      title: rawListing.title,
+      address: rawListing.address,
+      description: rawListing.description,
+      propertyType: rawListing.property_type,
+      location: rawListing.location,
+      distanceInMiles: Number(rawListing.distance_in_miles),
+      price: Number(rawListing.price),
+      numRoomsAvailable: rawListing.num_rooms_available,
+      totalRooms: rawListing.total_rooms,
+      numberRoommates: rawListing.number_roommates,
+      utilitiesIncluded: rawListing.utilities_included,
+      sqft: rawListing.sqft,
+      imageUrls: rawListing.imageUrls,
+      startDate: rawListing.start_date,
+      endDate: rawListing.end_date,
+      createdAt: rawListing.created_at,
+      updatedAt: rawListing.updated_at,
+      listerId: rawListing.lister_id,
+      // Include the additional data from includes
+      apartmentDetails: rawListing.apartmentDetails ? {
+        id: rawListing.apartmentDetails.id,
+        listingId: rawListing.apartmentDetails.listing_id,
+        roomType: rawListing.apartmentDetails.room_type,
+        apartmentType: rawListing.apartmentDetails.apartment_type,
+      } : undefined,
+      houseDetails: rawListing.houseDetails ? {
+        id: rawListing.houseDetails.id,
+        listingId: rawListing.houseDetails.listing_id,
+        numBathrooms: Number(rawListing.houseDetails.num_bathrooms),
+        numRooms: rawListing.houseDetails.num_rooms,
+      } : undefined,
+      lister: rawListing.lister ? {
+        id: rawListing.lister.id,
+        firstName: rawListing.lister.first_name,
+        lastName: rawListing.lister.last_name,
+        email: rawListing.lister.email,
+      } : undefined,
+      saveCount: rawListing._count?.savedBy || 0,
+    } as AppListing));
+
+    return { isError: false, data: cleaned };
+  } catch (error) {
+    console.error("Error fetching user listings:", error);
+    return { 
+      isError: true, 
+      message: "Failed to fetch user listings"
+    };
+  }
+}
