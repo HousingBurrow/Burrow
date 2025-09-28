@@ -22,7 +22,7 @@ export default function Page() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   // Allowed domains
-  const allowedDomains: string[] = ["gatech.edu"];
+  const allowedDomains: string[] = ["icloud.com", "gmail.com", "gatech.edu"];
 
   const validateEmailDomain = (email: string): boolean => {
     const domain = email.split("@")[1]?.toLowerCase();
