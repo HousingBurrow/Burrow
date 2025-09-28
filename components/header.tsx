@@ -41,6 +41,10 @@ export function Header() {
         />
       </Link>
       <Space>
+        <Link href="/">
+          <Button type="text">Home</Button>
+        </Link>
+
         <Link href="/profile/about_me">
           <Button type="text">Profile</Button>
         </Link>
@@ -51,7 +55,7 @@ export function Header() {
 
         {user && (
           <Link href="/new-listing">
-            <Button type="default">New Listing</Button>
+            <Button type="text">New Listing</Button>
           </Link>
         )}
 
