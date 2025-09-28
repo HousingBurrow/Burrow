@@ -1,3 +1,4 @@
+// app/profile/settings/page.tsx
 import { prisma } from "@/lib/prisma";
 import ClientSettings from "./ClientSettings";
 import { stackServerApp } from "./stack";
@@ -6,51 +7,34 @@ import { redirect } from "next/navigation";
 export const dynamic = "force-dynamic";
 
 export default async function SettingsPage() {
-  // Get the authenticated user from Stack Auth
   const user = await stackServerApp.getUser();
+  if (!user) redirect("/handler/sign-in");
 
-  // Redirect to login if not authenticated
-  if (!user) {
-    redirect("/handler/sign-in");
-  }
-
-  // Get the user's Stack Auth ID
   const stackUserId = user.id;
   const userEmail = user.primaryEmail?.toLowerCase().trim();
 
-  console.log("Stack Auth user:", { stackUserId, userEmail });
-
-  // Find or create the user in your database using their Stack Auth ID
-  // First try to find by stack_auth_id (if that field exists)
   let dbUser = await prisma.user.findFirst({
-    where: {
-      OR: [{ auth_id: stackUserId }, { email: userEmail || "" }],
-    },
+    where: { OR: [{ auth_id: stackUserId }, { email: userEmail || "" }] },
   });
 
-  console.log("User lookup result:", { found: !!dbUser, userId: dbUser?.id });
-
-  // If user doesn't exist, create them with required fields
   if (!dbUser) {
-    // Extract name from Stack Auth or use defaults
     const displayName = user.displayName || "";
-    const nameParts = displayName.split(" ");
-    const firstName = nameParts[0] || "User";
-    const lastName = nameParts.slice(1).join(" ") || "Name";
+    const parts = displayName.split(" ");
+    const first = parts[0] || "User";
+    const last = parts.slice(1).join(" ") || "Name";
 
     dbUser = await prisma.user.create({
       data: {
         auth_id: stackUserId,
         email: user.primaryEmail || "",
-        first_name: firstName,
-        last_name: lastName,
-        age: 0, // Default age - user can update in settings
-        gender: "Prefer not to say", // Default gender - user can update in settings
+        first_name: first,
+        last_name: last,
+        age: 0,
+        gender: "Prefer not to say",
         pfp: "",
       },
     });
   } else if (!dbUser.auth_id) {
-    // Update existing user with stack_auth_id if it's missing
     dbUser = await prisma.user.update({
       where: { id: dbUser.id },
       data: { auth_id: stackUserId },
@@ -65,6 +49,7 @@ export default async function SettingsPage() {
     gender:
       (dbUser.gender as "Male" | "Female" | "Other" | "Prefer not to say") ||
       "Prefer not to say",
+    pfp: dbUser.pfp || "",            // 👈 add this
     notifications: true,
     darkMode: false,
     defaultLocation: "Midtown" as const,

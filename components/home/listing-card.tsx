@@ -30,6 +30,8 @@ const ListingCard: FC<ListingCardProps> = ({
       hoverable
       style={{
         borderRadius: "8px",
+        width: "100%",
+        height: "100%",
       }}
       onClick={onCardClick}
       cover={
