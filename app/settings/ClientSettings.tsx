@@ -10,13 +10,11 @@ import {
   Avatar,
   Typography,
   Card,
-  Modal,
   message,
   Tabs,
   Space,
   Row,
   Col,
-  Divider,
 } from "antd";
 import {
   FiUser,
@@ -26,10 +24,8 @@ import {
   FiCamera,
   FiTrash2,
 } from "react-icons/fi";
-import { updateUser } from "../../lib/queries/users";
+import { updateUser, deleteUser } from "@/lib/queries/users";
 import "./settings.css";
-import { deleteUser } from "@/lib/queries/users";
-import { signOut } from "next-auth/react";
 
 const { Title, Text } = Typography;
 const { TabPane } = Tabs;
@@ -66,6 +62,10 @@ export default function ClientSettings({
   const [formData, setFormData] = useState<SettingsState>(initial);
   const [saving, startTransition] = useTransition();
 
+  // Ant Design message instance
+  const [msgApi, contextHolder] = message.useMessage();
+
+  // ------------------- Handle input changes -------------------
   const handleInputChange = <K extends keyof SettingsState>(
     key: K,
     value: SettingsState[K]
@@ -73,6 +73,7 @@ export default function ClientSettings({
     setFormData((prev) => ({ ...prev, [key]: value }));
   };
 
+  // ------------------- Save user data -------------------
   const handleSave = () => {
     startTransition(async () => {
       const res = await updateUser({
@@ -84,20 +85,26 @@ export default function ClientSettings({
         gender: formData.gender,
       });
 
-      if (res.isError) {
-        message.error(res.message || "Failed to save changes");
-      } else {
-        message.success("Settings saved successfully");
-      }
+      if (res.isError) msgApi.error(res.message || "Failed to save changes");
+      else msgApi.success("Settings saved successfully");
     });
   };
 
-  const handleDelete = () => {
-    console.log("Delete account clicked");
+  // ------------------- Delete user -------------------
+  const handleDelete = async () => {
+    const confirm = window.confirm(
+      "Are you sure you want to delete your account? This action is irreversible."
+    );
+    if (!confirm) return;
+
+    const res = await deleteUser(userId);
+    if (res.isError) msgApi.error(res.message || "Failed to delete account");
+    else msgApi.success("Account deleted successfully");
   };
 
   return (
-    <div style={{ minHeight: "100vh", padding: 32, background: "#f0f2f5" }}>
+    <div style={{ minHeight: "100vh", padding: 32 }}>
+      {contextHolder}
       <Card
         style={{
           maxWidth: 900,
@@ -133,8 +140,6 @@ export default function ClientSettings({
                 borderRadius: 16,
                 padding: 24,
                 marginBottom: 24,
-                background: "#fff",
-                boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
               }}
             >
               <Row gutter={24} align="middle">
@@ -142,7 +147,7 @@ export default function ClientSettings({
                   <div className="avatar-hover">
                     <Avatar
                       size={100}
-                      style={{ backgroundColor: "#1890ff", fontSize: 32 }}
+                      style={{ backgroundColor: "#6F826A", fontSize: 32 }}
                     >
                       {formData.firstName[0]?.toUpperCase() || "U"}
                       {formData.lastName[0]?.toUpperCase() || ""}
@@ -153,21 +158,14 @@ export default function ClientSettings({
                   </div>
                 </Col>
                 <Col flex="auto">
-                  <Text style={{ fontSize: 14, color: "#595959" }}>
+                  <Text style={{ fontSize: 14, color: "#6F826A" }}>
                     Upload a new profile picture. JPG, PNG, or GIF. Max 2MB.
                   </Text>
                 </Col>
               </Row>
             </Card>
 
-            <Card
-              style={{
-                borderRadius: 16,
-                padding: 24,
-                background: "#fff",
-                boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
-              }}
-            >
+            <Card style={{ borderRadius: 16, padding: 24 }}>
               <Form layout="vertical">
                 <Row gutter={16}>
                   <Col span={12}>
@@ -235,6 +233,28 @@ export default function ClientSettings({
                   />
                 </Form.Item>
               </Form>
+
+              <div style={{ textAlign: "right", marginTop: 32 }}>
+                <Space>
+                  <Button
+                    onClick={() => setFormData(initial)}
+                    disabled={saving}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="primary"
+                    onClick={handleSave}
+                    loading={saving}
+                    style={{
+                      background: "#6F826A",
+                      border: "none",
+                    }}
+                  >
+                    Save Changes
+                  </Button>
+                </Space>
+              </div>
             </Card>
           </TabPane>
 
@@ -248,14 +268,7 @@ export default function ClientSettings({
             }
             key="preferences"
           >
-            <Card
-              style={{
-                borderRadius: 16,
-                padding: 24,
-                background: "#fff",
-                boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
-              }}
-            > 
+            <Card style={{ borderRadius: 16, padding: 24 }}>
               <Form layout="vertical">
                 <Form.Item label="Dark Mode" valuePropName="checked">
                   <Switch
@@ -292,14 +305,7 @@ export default function ClientSettings({
             }
             key="notifications"
           >
-            <Card
-              style={{
-                borderRadius: 16,
-                padding: 24,
-                background: "#fff",
-                boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
-              }}
-            >
+            <Card style={{ borderRadius: 16, padding: 24 }}>
               <Form.Item label="Email Notifications" valuePropName="checked">
                 <Switch
                   checked={formData.notifications}
@@ -326,13 +332,13 @@ export default function ClientSettings({
               type="inner"
               title="Danger Zone"
               style={{
-                borderColor: "#ff4d4f",
+                borderColor: "#9A3F3F",
                 borderWidth: 1,
                 borderStyle: "solid",
                 borderRadius: 16,
               }}
             >
-              <Text style={{ color: "#ff4d4f" }}>
+              <Text style={{ color: "#9A3F3F" }}>
                 Deleting your account is irreversible.
               </Text>
               <div style={{ textAlign: "right", marginTop: 16 }}>
@@ -340,7 +346,7 @@ export default function ClientSettings({
                   type="primary"
                   danger
                   icon={<FiTrash2 />}
-                  onClick={() => handleDelete()}
+                  onClick={handleDelete}
                 >
                   Delete Account
                 </Button>
@@ -348,23 +354,6 @@ export default function ClientSettings({
             </Card>
           </TabPane>
         </Tabs>
-
-        <div style={{ textAlign: "right", marginTop: 32 }}>
-          <Space>
-            <Button disabled={saving}>Cancel</Button>
-            <Button
-              type="primary"
-              onClick={handleSave}
-              loading={saving}
-              style={{
-                background: "linear-gradient(90deg, #1890ff, #40a9ff)",
-                border: "none",
-              }}
-            >
-              Save Changes
-            </Button>
-          </Space>
-        </div>
       </Card>
     </div>
   );
