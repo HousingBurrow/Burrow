@@ -32,8 +32,6 @@ interface AccountInformationPageProps {
   initialEmail: string;
 }
 
-
-
 export default function AccountInformationPage({
   initialEmail,
 }: AccountInformationPageProps) {
@@ -119,13 +117,13 @@ export default function AccountInformationPage({
   const createUserMutation = useMutation({
     mutationFn: async (values: AccountFormValues) => {
       console.log("Creating user, current user:", user);
-      
+
       if (!user || !user.id) {
         throw new Error("No user authenticated. Please sign in again.");
       }
 
       const response = await createUser({
-        email: values.email,
+        email: user.primaryEmail ?? values.email,
         firstName: values.firstName,
         lastName: values.lastName,
         gender: values.gender,
@@ -168,8 +166,8 @@ export default function AccountInformationPage({
   };
 
   const handleSubmit = async (values: AccountFormValues) => {
-    console.log(values)
-    console.log(user)
+    console.log(values);
+    console.log(user);
     if (!emailVerified) {
       message.error("Please verify your email first");
       return;
@@ -208,14 +206,17 @@ export default function AccountInformationPage({
               { type: "email", message: "Please enter a valid email!" },
             ]}
           >
-            <Input 
-              placeholder="Enter your student email" 
+            <Input
+              placeholder="Enter your student email"
               disabled={emailVerified}
             />
           </Form.Item>
 
           {!emailVerified && (
-            <Space direction="vertical" style={{ width: "100%", marginBottom: 20 }}>
+            <Space
+              direction="vertical"
+              style={{ width: "100%", marginBottom: 20 }}
+            >
               <Button
                 type="primary"
                 onClick={handleSendVerification}
@@ -237,7 +238,11 @@ export default function AccountInformationPage({
                     value={verificationCode}
                     onChange={(e) => setVerificationCode(e.target.value)}
                     maxLength={6}
-                    style={{ textAlign: "center", fontSize: 20, letterSpacing: 5 }}
+                    style={{
+                      textAlign: "center",
+                      fontSize: 20,
+                      letterSpacing: 5,
+                    }}
                   />
                   <Button
                     type="primary"
