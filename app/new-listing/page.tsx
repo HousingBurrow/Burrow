@@ -22,6 +22,7 @@ import dayjs from "dayjs";
 import { useUser } from "@stackframe/stack";
 import { useQuery } from "@tanstack/react-query";
 import { getUserByAuthId } from "@/lib/queries/users";
+import { RcFile } from "antd/es/upload";
 
 const { TextArea } = Input;
 const { Title, Text } = Typography;
@@ -54,7 +55,7 @@ export default function NewListingPage() {
   const [form] = Form.useForm<NewListingFormValues>();
   const router = useRouter();
   const [utilitiesIncluded, setUtilitiesIncluded] = useState(true);
-  const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [imageUrls, setImageUrls] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
   const user = useUser();
 
@@ -82,8 +83,6 @@ export default function NewListingPage() {
         return;
       }
 
-      setLoading(true);
-
       const response = await createListing({
         distanceInMiles: values.distanceInMiles ? values.distanceInMiles : 0,
         address: values.address,
@@ -104,8 +103,6 @@ export default function NewListingPage() {
         createdAt: new Date(),
         updatedAt: new Date(),
       });
-
-      setLoading(false);
 
       if (response.isError) {
         console.error("Error creating listing response:", response.message);
@@ -178,11 +175,13 @@ export default function NewListingPage() {
               listType="picture-card"
               multiple
               maxCount={10}
-              beforeUpload={() => false}
+              beforeUpload={() => false} // Prevent auto upload
               onChange={(info) => {
-                setImageUrls(
-                  info.fileList.map((f) => f.originFileObj?.name || "")
-                );
+                const files: File[] = info.fileList
+                  .map((f) => f.originFileObj)
+                  .filter((f): f is RcFile => f !== undefined); // Type guard
+
+                setImageUrls(files);
               }}
             >
               <div>
@@ -311,7 +310,7 @@ export default function NewListingPage() {
               type="primary"
               htmlType="submit"
               size="large"
-              loading={loading}
+              loading={createListingMutation.isPending}
               style={{ width: "100%" }}
             >
               Create Listing
