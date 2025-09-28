@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useState } from "react";
 import {
@@ -12,7 +12,7 @@ import {
   message,
   Space,
   Card,
-  DatePicker
+  DatePicker,
 } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { createListing } from "@/lib/queries/listings";
@@ -20,12 +20,19 @@ import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import dayjs from "dayjs";
 import { useUser } from "@stackframe/stack";
+import { useQuery } from "@tanstack/react-query";
+import { getUserByAuthId } from "@/lib/queries/users";
 
 const { TextArea } = Input;
 const { Title, Text } = Typography;
 
 const propertyTypes = ["APARTMENT", "HOUSE"] as const;
-const locations = ["Midtown", "WestMidtown", "HomePark", "NorthAvenue"] as const;
+const locations = [
+  "Midtown",
+  "WestMidtown",
+  "HomePark",
+  "NorthAvenue",
+] as const;
 
 interface NewListingFormValues {
   title: string;
@@ -38,8 +45,8 @@ interface NewListingFormValues {
   totalRooms: number;
   price: number;
   sqft: number;
-  propertyType: typeof propertyTypes[number];
-  location: typeof locations[number];
+  propertyType: (typeof propertyTypes)[number];
+  location: (typeof locations)[number];
   distanceInMiles?: number;
 }
 
@@ -51,13 +58,32 @@ export default function NewListingPage() {
   const [loading, setLoading] = useState(false);
   const user = useUser();
 
+  const { data: dbUser } = useQuery({
+    queryKey: ["signedInUser", user?.id],
+    queryFn: async () => {
+      if (user) {
+        const response = await getUserByAuthId(user.id);
+        if (response.isError) {
+          return undefined;
+        }
+        return response.data;
+      } else {
+        return undefined;
+      }
+    },
+    enabled: !!user,
+  });
+
   const createListingMutation = useMutation({
     mutationFn: async (values: NewListingFormValues) => {
-        if (!user) {
-    message.error("You must be logged in to create a listing");
-    return;
-  }
+      if (!dbUser) {
+        message.error("User not found. Please sign in again.");
+        setLoading(false);
+        return;
+      }
+
       setLoading(true);
+
       const response = await createListing({
         distanceInMiles: values.distanceInMiles ? values.distanceInMiles : 0,
         address: values.address,
@@ -74,7 +100,7 @@ export default function NewListingPage() {
         propertyType: values.propertyType,
         location: values.location,
         imageUrls,
-        listerId: Number(user.id),
+        listerId: Number(dbUser.id),
         createdAt: new Date(),
         updatedAt: new Date(),
       });
@@ -102,7 +128,14 @@ export default function NewListingPage() {
   };
 
   return (
-    <div style={{ padding: 32, display: "flex", justifyContent: "center", minHeight: "90vh" }}>
+    <div
+      style={{
+        padding: 32,
+        display: "flex",
+        justifyContent: "center",
+        minHeight: "90vh",
+      }}
+    >
       <Card
         style={{
           width: "80%",
@@ -127,8 +160,16 @@ export default function NewListingPage() {
             <Input placeholder="Cozy dorm near campus" size="large" />
           </Form.Item>
 
-          <Form.Item label="Description" name="description" rules={[{ required: true }]}>
-            <TextArea placeholder="Describe your property" rows={4} size="large" />
+          <Form.Item
+            label="Description"
+            name="description"
+            rules={[{ required: true }]}
+          >
+            <TextArea
+              placeholder="Describe your property"
+              rows={4}
+              size="large"
+            />
           </Form.Item>
 
           {/* Image Upload */}
@@ -139,7 +180,9 @@ export default function NewListingPage() {
               maxCount={10}
               beforeUpload={() => false}
               onChange={(info) => {
-                setImageUrls(info.fileList.map((f) => f.originFileObj?.name || ""));
+                setImageUrls(
+                  info.fileList.map((f) => f.originFileObj?.name || "")
+                );
               }}
             >
               <div>
@@ -152,47 +195,96 @@ export default function NewListingPage() {
             </Text>
           </Form.Item>
 
-          <Form.Item label="Address" name="address" rules={[{ required: true }]}>
+          <Form.Item
+            label="Address"
+            name="address"
+            rules={[{ required: true }]}
+          >
             <Input placeholder="123 Main St, Atlanta, GA" size="large" />
           </Form.Item>
 
-          <Form.Item label="Price ($/month)" name="price" rules={[{ required: true }]}>
+          <Form.Item
+            label="Price ($/month)"
+            name="price"
+            rules={[{ required: true }]}
+          >
             <InputNumber min={0} style={{ width: "100%" }} size="large" />
           </Form.Item>
 
-          <Form.Item label="Square Footage" name="sqft" rules={[{ required: true }]}>
+          <Form.Item
+            label="Square Footage"
+            name="sqft"
+            rules={[{ required: true }]}
+          >
             <InputNumber min={0} style={{ width: "100%" }} size="large" />
           </Form.Item>
 
-          <Form.Item label="Number of Rooms Available" name="numRoomsAvailable" rules={[{ required: true }]}>
+          <Form.Item
+            label="Number of Rooms Available"
+            name="numRoomsAvailable"
+            rules={[{ required: true }]}
+          >
             <InputNumber min={1} style={{ width: "100%" }} size="large" />
           </Form.Item>
 
-          <Form.Item label="Number of Roommates per Room" name="numRoommates" rules={[{ required: true }]}>
+          <Form.Item
+            label="Number of Roommates per Room"
+            name="numRoommates"
+            rules={[{ required: true }]}
+          >
             <InputNumber min={1} style={{ width: "100%" }} size="large" />
           </Form.Item>
 
-          <Form.Item label="Total Rooms" name="totalRooms" rules={[{ required: true }]}>
+          <Form.Item
+            label="Total Rooms"
+            name="totalRooms"
+            rules={[{ required: true }]}
+          >
             <InputNumber min={1} style={{ width: "100%" }} size="large" />
           </Form.Item>
 
-          <Form.Item label="Property Type" name="propertyType" rules={[{ required: true }]}>
-            <Select options={propertyTypes.map((type) => ({ label: type, value: type }))} size="large" />
+          <Form.Item
+            label="Property Type"
+            name="propertyType"
+            rules={[{ required: true }]}
+          >
+            <Select
+              options={propertyTypes.map((type) => ({
+                label: type,
+                value: type,
+              }))}
+              size="large"
+            />
           </Form.Item>
 
-          <Form.Item label="Location" name="location" rules={[{ required: true }]}>
-            <Select options={locations.map((loc) => ({ label: loc, value: loc }))} size="large" />
+          <Form.Item
+            label="Location"
+            name="location"
+            rules={[{ required: true }]}
+          >
+            <Select
+              options={locations.map((loc) => ({ label: loc, value: loc }))}
+              size="large"
+            />
           </Form.Item>
 
           <Form.Item label="Distance in Miles" name="distanceInMiles">
             <InputNumber min={0} style={{ width: "100%" }} size="large" />
           </Form.Item>
 
-          <Form.Item label="Start Date" name="startDate" rules={[{ required: true }]}>
+          <Form.Item
+            label="Start Date"
+            name="startDate"
+            rules={[{ required: true }]}
+          >
             <DatePicker style={{ width: "100%" }} size="large" />
           </Form.Item>
 
-          <Form.Item label="End Date" name="endDate" rules={[{ required: true }]}>
+          <Form.Item
+            label="End Date"
+            name="endDate"
+            rules={[{ required: true }]}
+          >
             <DatePicker style={{ width: "100%" }} size="large" />
           </Form.Item>
 
