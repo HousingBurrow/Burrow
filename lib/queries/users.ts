@@ -64,13 +64,17 @@ export async function updateUser({ id, email, firstName, lastName, age, gender }
 // returns users given userID
 export async function getUserById(id: number): ActionResult<User> {
   try {
-    const user = await prisma.user.findUniqueOrThrow({ where: { id } });
-    return { isError: false, data: user };
+    const user = await prisma.user.findUnique({ where: { id } }) // 👈 change here
+    if (!user) {
+      return { isError: true, message: `No user found with id ${id}` }
+    }
+    return { isError: false, data: user }
   } catch (e) {
-    console.log("Error getting user", e);
-    return { isError: true, message: (e as Error).message };
+    console.log("Error getting user", e)
+    return { isError: true, message: (e as Error).message }
   }
 }
+
 
 export async function deleteUser(id: number): ActionResult<User> {
   try {
@@ -78,6 +82,15 @@ export async function deleteUser(id: number): ActionResult<User> {
     return { isError: false, data: user };
   } catch (e) {
     console.log("Error deleting user", e);
+    return { isError: true, message: (e as Error).message };
+  }
+}
+
+export async function getUserByEmail(email: string) {
+  try {
+    const user = await prisma.user.findUnique({ where: { email } });
+    return { isError: false, data: user ?? null };
+  } catch (e) {
     return { isError: true, message: (e as Error).message };
   }
 }
