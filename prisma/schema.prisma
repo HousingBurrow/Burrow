@@ -44,6 +44,7 @@ enum Location {
 
 model User {
   id         Int       @id @default(autoincrement())
+  stack_auth_id String?  @unique  // Link to Stack Auth user
   email      String    @unique
   first_name String
   last_name  String
