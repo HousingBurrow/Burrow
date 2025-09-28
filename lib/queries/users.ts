@@ -5,7 +5,7 @@ import { ActionResult } from "../utils/action-result";
 import { prisma } from "../../lib/prisma";
 
 interface CreateUserProps {
-  auth: string;
+  // auth: string;
   email: string;
   firstName: string;
   lastName: string;
