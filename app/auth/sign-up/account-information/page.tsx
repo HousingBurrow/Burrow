@@ -63,8 +63,9 @@ export default function AccountInformationPage({
           message.error("Failed to create user.");
           throw new Error(response.message);
         }
+      } else {
+        throw new Error("No user id");
       }
-      throw new Error("No user id");
     },
     onSuccess: () => {
       console.log("User created successfully");
