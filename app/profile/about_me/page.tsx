@@ -14,6 +14,7 @@ type User = {
   last_name: string
   gender: string
   age: number
+  pfp?: string
 }
 
 export default function AboutMePage() {
@@ -60,32 +61,35 @@ export default function AboutMePage() {
   if (!user) return <Typography.Text type="danger">No user found.</Typography.Text>
 
   return (
-    <Space direction="vertical" size="large" style={{ display: 'flex' }}>
-      <Card>
-        <Space direction="vertical" align="center" style={{ width: '100%' }}>
-        <Avatar
-          size={96}
-          src={user.pfp || undefined}
-          icon={!user.pfp ? <UserOutlined /> : undefined}
-        />
+    <Card
+      style={{ maxWidth: 350, margin: '0 auto', borderRadius: 12 }}
+      bodyStyle={{ padding: '20px', textAlign: 'center' }}
+    >
+      <Avatar
+        size={96}
+        src={user.pfp || undefined}
+        icon={!user.pfp ? <UserOutlined /> : undefined}
+        style={{ marginBottom: 16 }}
+      />
 
+      <Typography.Title level={4} style={{ marginBottom: 4 }}>
+        {user.first_name} {user.last_name}
+      </Typography.Title>
 
-          <Typography.Title level={4} style={{ marginBottom: 0 }}>
-            {user.first_name} {user.last_name}
-          </Typography.Title>
+      <Typography.Text type="secondary" style={{ display: 'block', marginBottom: 16 }}>
+        {user.email}
+      </Typography.Text>
 
-          <Typography.Paragraph type="secondary" style={{ textAlign: 'center', marginTop: 8 }}>
-            Email: {user.email} <br />
-            Gender: {user.gender ?? 'Not set'} <br />
-            Age: {user.age ?? 'Not set'}
-          </Typography.Paragraph>
+      <Typography.Paragraph style={{ marginBottom: 16 }}>
+        Gender: {user.gender ?? 'Not set'} <br />
+        Age: {user.age ?? 'Not set'}
+      </Typography.Paragraph>
 
-<Link href="/settings">
-  <Button type="primary">Edit profile</Button>
-</Link>
-
-        </Space>
-      </Card>
-    </Space>
+      <Link href="/settings">
+        <Button type="primary" block>
+          Edit Profile
+        </Button>
+      </Link>
+    </Card>
   )
 }

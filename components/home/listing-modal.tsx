@@ -58,7 +58,7 @@ const ImageCard = ({
       style={{
         borderRadius: "6px",
         overflow: "hidden",
-        border: "1px solid #e5e5e5",
+        border: "1px solid #931e1eff",
         flexShrink: 0, // Prevent the container from shrinking
       }}
     >
