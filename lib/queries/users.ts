@@ -5,7 +5,7 @@ import { ActionResult } from "../utils/action-result";
 import { prisma } from "../../lib/prisma";
 
 interface CreateUserProps {
-  auth: string;
+  // auth: string;
   email: string;
   firstName: string;
   lastName: string;
@@ -20,7 +20,7 @@ export async function createUser({
   lastName,
   gender,
   age,
-  auth,
+  // auth,
   pfp,
 }: CreateUserProps): ActionResult<User> {
   try {
@@ -32,7 +32,7 @@ export async function createUser({
         gender: gender,
         age: age,
         pfp: pfp,
-        stack_auth_id: auth,
+        // stack_auth_id: auth,
       },
     });
 
