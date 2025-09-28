@@ -1,85 +1,57 @@
-"use client";
+// app/profile/about_me/page.tsx
+import { prisma } from "@/lib/prisma";
+import { redirect } from "next/navigation";
+import AboutMeClient from "./AboutMeClient";
 
-import { useEffect, useState } from "react";
-import { Card, Avatar, Typography, Button, Space, Spin } from "antd";
-import { UserOutlined } from "@ant-design/icons";
-import { useRouter } from "next/navigation";
-import { getUserByEmail } from "@/lib/queries/users";
-import Link from "next/link";
-import { User } from "@prisma/client";
+// Reuse the same Stack server app as your Settings page
+import { stackServerApp } from "../../settings/stack";
 
-export default function AboutMePage() {
-  const router = useRouter();
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+export const dynamic = "force-dynamic";
 
-  useEffect(() => {
-    async function load() {
-      try {
-        const me = await fetch("/api/auth/me", { cache: "no-store" });
-        if (!me.ok) {
-          setError("Please sign in.");
-          return;
-        }
-        const { email } = (await me.json()) as { email: string };
+export default async function AboutMePage() {
+  const user = await stackServerApp.getUser();
+  if (!user) redirect("/handler/sign-in");
 
-        const res = await getUserByEmail(email);
-        if (res.isError) {
-          setError(res.message ?? "Failed to fetch user");
-          return;
-        }
+  const stackUserId = user.id;
+  const userEmail = user.primaryEmail?.toLowerCase().trim() ?? "";
 
-        setUser(res.data ?? null);
-        if (!res.data) {
-          setError("No user profile found in database.");
-        }
-      } catch (e) {
-        console.error(e);
-        setError("Unexpected error loading profile.");
-      } finally {
-        setLoading(false);
-      }
-    }
+  // Mirror the Settings bootstrap logic so About Me always has data to show
+  let dbUser = await prisma.user.findFirst({
+    where: { OR: [{ auth_id: stackUserId }, { email: userEmail }] },
+  });
 
-    load();
-  }, []);
+  if (!dbUser) {
+    const displayName = user.displayName || "";
+    const parts = displayName.split(" ");
+    const first = parts[0] || "User";
+    const last = parts.slice(1).join(" ") || "Name";
 
-  if (loading) return <Spin />;
+    dbUser = await prisma.user.create({
+      data: {
+        auth_id: stackUserId,
+        email: user.primaryEmail || "",
+        first_name: first,
+        last_name: last,
+        age: 0,
+        gender: "Prefer not to say",
+        pfp: "",
+      },
+    });
+  } else if (!dbUser.auth_id) {
+    dbUser = await prisma.user.update({
+      where: { id: dbUser.id },
+      data: { auth_id: stackUserId },
+    });
+  }
 
-  if (error) return <Typography.Text type="danger">{error}</Typography.Text>;
+  const profile = {
+    firstName: dbUser.first_name ?? "",
+    lastName: dbUser.last_name ?? "",
+    email: dbUser.email ?? user.primaryEmail ?? "",
+    age: dbUser.age ?? 0,
+    gender: (dbUser.gender as "Male" | "Female" | "Other" | "Prefer not to say") ?? "Prefer not to say",
+    pfp: dbUser.pfp ?? "",
+  };
 
-  if (!user)
-    return <Typography.Text type="danger">No user found.</Typography.Text>;
-
-  return (
-    <Space direction="vertical" size="large" style={{ display: "flex" }}>
-      <Card>
-        <Space direction="vertical" align="center" style={{ width: "100%" }}>
-          <Avatar
-            size={96}
-            src={user.pfp || undefined}
-            icon={!user.pfp ? <UserOutlined /> : undefined}
-          />
-
-          <Typography.Title level={4} style={{ marginBottom: 0 }}>
-            {user.first_name} {user.last_name}
-          </Typography.Title>
-
-          <Typography.Paragraph
-            type="secondary"
-            style={{ textAlign: "center", marginTop: 8 }}
-          >
-            Email: {user.email} <br />
-            Gender: {user.gender ?? "Not set"} <br />
-            Age: {user.age ?? "Not set"}
-          </Typography.Paragraph>
-
-          <Link href="/settings">
-            <Button type="primary">Edit profile</Button>
-          </Link>
-        </Space>
-      </Card>
-    </Space>
-  );
+  return <AboutMeClient profile={profile} />;
 }
