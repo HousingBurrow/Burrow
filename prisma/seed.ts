@@ -181,6 +181,7 @@ async function main() {
           last_name: `Test${i + 1}`,
           gender: i % 2 === 0 ? "Male" : "Female",
           age: randomInt(18, 30),
+          pfp: "",
         },
       })
     )

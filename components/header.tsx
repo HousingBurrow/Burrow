@@ -1,14 +1,11 @@
 "use client";
 
-import { useUser, useStackApp } from "@stackframe/stack";
-import { Row, Space, Button } from "antd";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useUser } from "@stackframe/stack";
+import { Button, Row, Space } from "antd";
 import Image from "next/image";
+import Link from "next/link";
 
 export function Header() {
-  const pathname = usePathname();
-  const isProfilePage = pathname.startsWith("/profile");
   const user = useUser();
 
   return (
@@ -16,6 +13,7 @@ export function Header() {
       style={{
         background: "#fff",
         height: 64,
+        width: "100%",
         padding: "0 32px",
         display: "flex",
         justifyContent: "space-between",
@@ -29,21 +27,19 @@ export function Header() {
       <Link
         href="/"
         style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 8,
-          height: "100%",
+          height: "80%",
+          width: "10%",
+          position: "relative",
         }}
       >
         <Image
-          src="/logo.png"
+          src="/cropped_logo.png"
           alt="Burrow Logo"
-          width={200} // adjust size here
-          height={200}
-          style={{ objectFit: "contain" }}
+          fill
+          style={{ objectFit: "fill" }}
+          priority
         />
       </Link>
-
       <Space>
         <Link href="/">
           <Button type="text">Home</Button>
@@ -67,7 +63,11 @@ export function Header() {
             </Link>
           </>
         ) : (
-          <Button type="primary" variant="outlined" onClick={() => user.signOut()}>
+          <Button
+            type="primary"
+            variant="outlined"
+            onClick={() => user.signOut()}
+          >
             Logout
           </Button>
         )}
