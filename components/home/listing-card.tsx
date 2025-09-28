@@ -1,10 +1,10 @@
-import React, { FC } from "react";
-import { Card, Typography } from "antd";
+import React, { FC, ReactNode, useState } from "react";
+import { Button, Card, Typography } from "antd";
 import Image from "next/image";
 import { startCase } from "lodash";
+import { LuBookmark } from "react-icons/lu";
 
 const { Text, Title } = Typography;
-
 export interface ListingCardProps {
   listing: {
     title: string;
@@ -12,18 +12,26 @@ export interface ListingCardProps {
     location: string;
     price: number;
   };
-  onClick: () => void;
+  onCardClick: () => void;
+  hoverButton?: ReactNode;
 }
 
-const ListingCard: FC<ListingCardProps> = ({ listing, onClick }) => {
+const ListingCard: FC<ListingCardProps> = ({
+  listing,
+  onCardClick,
+  hoverButton,
+}) => {
   const { title: title, imageUrl, location, price } = listing;
+
+  const [isHovered, setIsHovered] = useState(false);
+
   return (
     <Card
       hoverable
       style={{
         borderRadius: "8px",
       }}
-      onClick={onClick}
+      onClick={onCardClick}
       cover={
         <div
           style={{
@@ -35,6 +43,8 @@ const ListingCard: FC<ListingCardProps> = ({ listing, onClick }) => {
             borderBottomLeftRadius: "0",
             overflow: "hidden",
           }}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
         >
           <Image
             alt={title}
@@ -44,6 +54,23 @@ const ListingCard: FC<ListingCardProps> = ({ listing, onClick }) => {
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             quality={85}
           />
+          {hoverButton && (
+            <div
+              style={{
+                top: "8px",
+                right: "8px",
+                display: "flex",
+                position: "absolute",
+                alignItems: "center",
+                justifyContent: "center",
+                opacity: isHovered ? 1 : 0,
+                transition: "opacity 0.2s ease",
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {hoverButton}
+            </div>
+          )}
         </div>
       }
     >

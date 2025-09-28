@@ -5,11 +5,21 @@ import ListingModal from "@/components/home/listing-modal";
 import { SearchBar, searchFormSchema } from "@/components/home/search-bar";
 import { getAllListings } from "@/lib/queries/listings";
 import { AppListing } from "@/lib/schemas";
-import { useInfiniteQuery } from "@tanstack/react-query";
-import { Col, Divider, Row } from "antd";
-import { useEffect, useState } from "react";
+import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query";
+import { Button, Col, Divider, Row, Typography } from "antd";
+import { useState } from "react";
+import { LuBookmark } from "react-icons/lu";
 import InfiniteScroll from "react-infinite-scroll-component";
 import z from "zod";
+import Image from "next/image";
+import {
+  getSavedListingsForUser,
+  getUserByAuthId,
+  toggleSaveListing,
+} from "@/lib/queries/users";
+import { useUser } from "@stackframe/stack";
+
+const { Text } = Typography;
 
 export default function HomePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -21,7 +31,7 @@ export default function HomePage() {
     z.infer<typeof searchFormSchema> | undefined
   >();
 
-  useEffect(() => console.log(filterState), [filterState]);
+  const user = useUser();
 
   // Transform SearchBar format to getAllListings format
   const transformFilters = (
@@ -43,7 +53,7 @@ export default function HomePage() {
     data: listings,
     fetchNextPage,
     hasNextPage,
-    isFetching,
+    isLoading,
     isFetchingNextPage,
   } = useInfiniteQuery({
     queryKey: ["listings", JSON.stringify(filterState)],
@@ -61,6 +71,59 @@ export default function HomePage() {
     },
     getNextPageParam: (lastPage) => lastPage.nextCursor,
     initialPageParam: undefined,
+  });
+
+  const { data: dbUser } = useQuery({
+    queryKey: ["signedInUser"],
+    queryFn: async () => {
+      if (user) {
+        const response = await getUserByAuthId(user.id);
+        if (response.isError) {
+          return undefined;
+        }
+
+        return response.data;
+      } else {
+        return undefined;
+      }
+    },
+  });
+
+  const { data: savedListingsIds, refetch: refetchSavedListingsIds } = useQuery(
+    {
+      queryKey: ["savedListings", dbUser],
+      queryFn: async () => {
+        if (dbUser) {
+          const response = await getSavedListingsForUser(dbUser.id);
+          if (response.isError) {
+            return undefined;
+          }
+
+          const listingIds = response.data.map(({ id }) => id);
+          const listingIdsSet = new Set(listingIds);
+
+          return listingIdsSet;
+        } else {
+          return undefined;
+        }
+      },
+    }
+  );
+
+  const toggleMutation = useMutation({
+    mutationFn: async ({
+      userId,
+      listingId,
+    }: {
+      userId: number;
+      listingId: number;
+    }) => await toggleSaveListing(userId, listingId),
+    onSuccess: () => {
+      refetchSavedListingsIds();
+    },
+    onError: (error) => {
+      console.error("bad stuff happened", error);
+    },
   });
 
   const showModal = (listing: AppListing) => {
@@ -96,7 +159,7 @@ export default function HomePage() {
         scrollThreshold={0.9} // triggers when 90% of page scrolled
         style={{ width: "100%" }}
       >
-        {listings ? (
+        {listings && !isLoading ? (
           <Row gutter={[16, 16]} style={{ padding: "32px", width: "100%" }}>
             {listings.pages
               .flatMap((page) => page.data)
@@ -109,13 +172,61 @@ export default function HomePage() {
                       price: Number(listing.price),
                       imageUrl: listing.imageUrls[0],
                     }}
-                    onClick={() => showModal(listing)}
+                    onCardClick={() => showModal(listing)}
+                    hoverButton={
+                      dbUser ? (
+                        <Button
+                          onClick={() => {
+                            toggleMutation.mutate({
+                              userId: dbUser.id,
+                              listingId: listing.id,
+                            });
+                          }}
+                          style={{
+                            padding: "0",
+                            width: "32px",
+                            height: "32px",
+                            borderRadius: "calc(infinity * 1px)",
+                          }}
+                        >
+                          <LuBookmark
+                            color={
+                              savedListingsIds?.has(listing.id)
+                                ? "#FFD700"
+                                : "currentColor"
+                            }
+                            fill={
+                              savedListingsIds?.has(listing.id)
+                                ? "#FFD700"
+                                : "none"
+                            }
+                          />
+                        </Button>
+                      ) : undefined
+                    }
                   />
                 </Col>
               ))}
           </Row>
         ) : (
-          <p style={{ textAlign: "center" }}>Loading...</p>
+          <div
+            style={{
+              width: "100%",
+              height: "100%",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              flexDirection: "column",
+            }}
+          >
+            <Image
+              src="/standing-prairie-dog.png"
+              height={320}
+              width={320}
+              alt="images"
+            />
+            <Text strong>Nothing to see here...</Text>
+          </div>
         )}
       </InfiniteScroll>
 
