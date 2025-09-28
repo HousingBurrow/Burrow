@@ -52,6 +52,7 @@ model User {
   age        Int
   listings   Listing[]
   savedListings Saved[]
+  pfp      String
 
   @@index([last_name])
 }

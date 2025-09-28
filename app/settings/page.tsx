@@ -49,6 +49,7 @@ export default async function SettingsPage() {
         last_name: lastName,
         age: 0, // Default age - user can update in settings
         gender: 'Prefer not to say', // Default gender - user can update in settings
+        pfp: "",
       }
     });
   } else if (!dbUser.stack_auth_id) {
