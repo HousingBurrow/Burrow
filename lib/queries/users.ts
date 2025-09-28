@@ -50,8 +50,9 @@ type updateUserProps = {
   lastName?: string;
   age?: number;
   gender?: string;
+  pfp?: string,
 }
-export async function updateUser({ id, email, firstName, lastName, age, gender }: updateUserProps): ActionResult<User> {
+export async function updateUser({ id, email, firstName, lastName, age, gender, pfp }: updateUserProps): ActionResult<User> {
   try {
     const user = await prisma.user.update({ where: { id }, data: {
       email: email,
@@ -59,6 +60,7 @@ export async function updateUser({ id, email, firstName, lastName, age, gender }
       last_name: lastName,
       age: age,
       gender: gender,
+      pfp: pfp,
     }});
     return {isError: false, data: user};
   } catch (e) {
