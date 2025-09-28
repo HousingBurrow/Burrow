@@ -4,7 +4,7 @@ import ListingCard from "@/components/home/listing-card";
 import ListingModal from "@/components/home/listing-modal";
 import { getSavedListingsForUser, getUserByAuthId } from "@/lib/queries/users";
 import { AppListing } from "@/lib/schemas";
-import { useUser } from "@stackframe/stack";
+import { useCurrentUser } from "@/lib/stack";
 import { useQuery } from "@tanstack/react-query";
 import { Col, Row, Typography, Spin } from "antd";
 import { useState } from "react";
@@ -12,10 +12,10 @@ import { useState } from "react";
 const { Title, Text } = Typography;
 
 export default function MyListingsPage() {
-  const user = useUser();
+  const user = useCurrentUser();
 
   const { data: dbUser } = useQuery({
-    queryKey: ["signedInUser"],
+    queryKey: ["signedInUser", user?.id],
     queryFn: async () => {
       if (user) {
         const response = await getUserByAuthId(user.id);
@@ -28,10 +28,11 @@ export default function MyListingsPage() {
         return undefined;
       }
     },
+    enabled: !!user,
   });
 
   const { data: savedListings = [], isLoading } = useQuery({
-    queryKey: ["savedListings", dbUser],
+    queryKey: ["savedListings", dbUser?.id],
     queryFn: async () => {
       if (dbUser) {
         const response = await getSavedListingsForUser(dbUser.id);
@@ -43,6 +44,7 @@ export default function MyListingsPage() {
         return undefined;
       }
     },
+    enabled: !!dbUser,
   });
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -63,7 +65,7 @@ export default function MyListingsPage() {
     <div style={{ padding: 24 }}>
       <Title level={3}>My Listings</Title>
 
-      {savedListings.length === 0 ? (
+      {!savedListings.length ? (
         <Text type="secondary">No saved listings found.</Text>
       ) : (
         <Row gutter={[16, 16]} style={{ padding: "32px 0" }}>

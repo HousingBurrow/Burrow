@@ -37,7 +37,7 @@ export default function AboutMePage() {
           return
         }
 
-        setUser(res.data ?? null) // avoid undefined → TS-safe
+        setUser(res.data ?? null)
         if (!res.data) {
           setError('No user profile found in database.')
         }

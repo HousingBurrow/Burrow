@@ -17,7 +17,7 @@ import {
   getUserByAuthId,
   toggleSaveListing,
 } from "@/lib/queries/users";
-import { useUser } from "@stackframe/stack";
+import { useCurrentUser } from "@/lib/stack";
 
 const { Text } = Typography;
 
@@ -31,7 +31,7 @@ export default function HomePage() {
     z.infer<typeof searchFormSchema> | undefined
   >();
 
-  const user = useUser();
+  const user = useCurrentUser();
 
   // Transform SearchBar format to getAllListings format
   const transformFilters = (
@@ -74,7 +74,7 @@ export default function HomePage() {
   });
 
   const { data: dbUser } = useQuery({
-    queryKey: ["signedInUser"],
+    queryKey: ["signedInUser", user?.id],
     queryFn: async () => {
       if (user) {
         const response = await getUserByAuthId(user.id);
@@ -87,28 +87,32 @@ export default function HomePage() {
         return undefined;
       }
     },
+    enabled: !!user,
   });
 
-  const { data: savedListingsIds, refetch: refetchSavedListingsIds } = useQuery(
-    {
-      queryKey: ["savedListings", dbUser],
-      queryFn: async () => {
-        if (dbUser) {
-          const response = await getSavedListingsForUser(dbUser.id);
-          if (response.isError) {
-            return undefined;
-          }
-
-          const listingIds = response.data.map(({ id }) => id);
-          const listingIdsSet = new Set(listingIds);
-
-          return listingIdsSet;
-        } else {
+  const {
+    data: savedListingsIds = new Set<number>(),
+    refetch: refetchSavedListingsIds,
+  } = useQuery({
+    queryKey: ["savedListingsIds", dbUser?.id],
+    queryFn: async () => {
+      if (dbUser) {
+        const response = await getSavedListingsForUser(dbUser.id);
+        console.log(response);
+        if (response.isError) {
           return undefined;
         }
-      },
-    }
-  );
+
+        const listingIds = response.data.map(({ id }) => id);
+        const listingIdsSet = new Set(listingIds);
+
+        return listingIdsSet;
+      } else {
+        return undefined;
+      }
+    },
+    enabled: !!dbUser,
+  });
 
   const toggleMutation = useMutation({
     mutationFn: async ({
@@ -174,7 +178,7 @@ export default function HomePage() {
                     }}
                     onCardClick={() => showModal(listing)}
                     hoverButton={
-                      dbUser ? (
+                      dbUser && savedListingsIds ? (
                         <Button
                           onClick={() => {
                             toggleMutation.mutate({
@@ -191,14 +195,14 @@ export default function HomePage() {
                         >
                           <LuBookmark
                             color={
-                              savedListingsIds?.has(listing.id)
+                              savedListingsIds.has(listing.id)
                                 ? "#FFD700"
-                                : "currentColor"
+                                : undefined
                             }
                             fill={
-                              savedListingsIds?.has(listing.id)
+                              savedListingsIds.has(listing.id)
                                 ? "#FFD700"
-                                : "none"
+                                : undefined
                             }
                           />
                         </Button>
