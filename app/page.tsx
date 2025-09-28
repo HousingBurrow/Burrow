@@ -98,7 +98,6 @@ export default function HomePage() {
     queryFn: async () => {
       if (dbUser) {
         const response = await getSavedListingsForUser(dbUser.id);
-        console.log(response);
         if (response.isError) {
           return undefined;
         }
@@ -137,12 +136,11 @@ export default function HomePage() {
 
   const handleCancel = () => setIsModalOpen(false);
 
-
-  useEffect(() => {
-    console.log("user", user)
-    console.log("dbUser",dbUser)
-    console.log("saved",savedListingsIds )
-  }, [user, dbUser, savedListingsIds])
+  // useEffect(() => {
+  //   console.log("user", user)
+  //   console.log("dbUser",dbUser)
+  //   console.log("saved",savedListingsIds )
+  // }, [user, dbUser, savedListingsIds])
 
   return (
     <div style={{ maxWidth: "100%", overflow: "hidden" }}>
