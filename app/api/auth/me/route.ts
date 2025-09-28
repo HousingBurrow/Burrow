@@ -1,34 +1,37 @@
 import { NextResponse } from 'next/server'
 import { StackServerApp } from '@stackframe/stack'
-// If your SDK exports a proper type for the user, you can also:
-// import type { CurrentUser } from '@stackframe/stack'
 
-type MaybeEmailUser = {
-  primaryEmail?: string | { email?: string }
-  email?: string
-  emails?: Array<{ email?: string }>
-}
+// Helper that inspects an unknown object safely (no `any`)
+type UnknownRec = Record<string, unknown>
 
-function extractEmail(obj: unknown): string | null {
-  const u = obj as MaybeEmailUser
+function extractEmail(user: unknown): string | null {
+  const u = user as UnknownRec
 
-  // primaryEmail can be a string or an object with { email }
-  if (typeof u.primaryEmail === 'string' && u.primaryEmail) {
-    return u.primaryEmail
+  // primaryEmail can be a string or an object with { email: string }
+  const primaryEmail = u['primaryEmail']
+  if (typeof primaryEmail === 'string' && primaryEmail) {
+    return primaryEmail
   }
-  if (u.primaryEmail && typeof u.primaryEmail === 'object' && u.primaryEmail.email) {
-    return u.primaryEmail.email || null
-  }
-
-  // some SDKs expose a direct email
-  if (typeof u.email === 'string' && u.email) {
-    return u.email
+  if (
+    primaryEmail &&
+    typeof primaryEmail === 'object' &&
+    typeof (primaryEmail as UnknownRec)['email'] === 'string'
+  ) {
+    return (primaryEmail as UnknownRec)['email'] as string
   }
 
-  // or an array of emails
-  if (Array.isArray(u.emails) && u.emails.length > 0) {
-    const first = u.emails[0]
-    if (first?.email) return first.email
+  // some SDKs expose a direct `email`
+  if (typeof u['email'] === 'string' && u['email']) {
+    return u['email'] as string
+  }
+
+  // or an array `emails: [{ email: string }, ...]`
+  const emails = u['emails']
+  if (Array.isArray(emails) && emails.length > 0) {
+    const first = emails[0] as UnknownRec
+    if (first && typeof first['email'] === 'string') {
+      return first['email'] as string
+    }
   }
 
   return null
