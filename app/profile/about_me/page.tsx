@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { Card, Avatar, Typography, Button, Space, Spin } from 'antd'
 import { UserOutlined } from '@ant-design/icons'
 import { getUserByEmail } from '@/lib/queries/users'
+import Link from 'next/link'
 
 type User = {
   id: number
@@ -66,7 +67,12 @@ export default function AboutMePage() {
     <Space direction="vertical" size="large" style={{ display: 'flex' }}>
       <Card>
         <Space direction="vertical" align="center" style={{ width: '100%' }}>
-          <Avatar size={96} icon={<UserOutlined />} />
+        <Avatar
+          size={96}
+          src={user.pfp || undefined}
+          icon={!user.pfp ? <UserOutlined /> : undefined}
+        />
+
 
           <Typography.Title level={4} style={{ marginBottom: 0 }}>
             {user.first_name} {user.last_name}
@@ -78,7 +84,10 @@ export default function AboutMePage() {
             Age: {user.age ?? 'Not set'}
           </Typography.Paragraph>
 
-          <Button>Edit profile</Button>
+<Link href="/settings">
+  <Button type="primary">Edit profile</Button>
+</Link>
+
         </Space>
       </Card>
     </Space>
