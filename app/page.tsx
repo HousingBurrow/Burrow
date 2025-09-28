@@ -202,7 +202,7 @@ export default function HomePage() {
                             fill={
                               savedListingsIds.has(listing.id)
                                 ? "#FFD700"
-                                : 'currentColor'
+                                : "none"
                             }
                           />
                         </Button>

@@ -11,14 +11,14 @@ export function Header() {
   return (
     <Row
       style={{
-        background: "#fff",
+        background: "#DCCFC0",
         height: 64,
         width: "100%",
         padding: "0 32px",
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
-        borderBottom: "1px solid #f0f0f0",
+        borderBottom: "1px solid #171717",
         top: 0,
         zIndex: 1000,
       }}
@@ -41,10 +41,6 @@ export function Header() {
         />
       </Link>
       <Space>
-        <Link href="/">
-          <Button type="text">Home</Button>
-        </Link>
-
         <Link href="/profile/about_me">
           <Button type="text">Profile</Button>
         </Link>
@@ -53,9 +49,11 @@ export function Header() {
           <Button type="text">Settings</Button>
         </Link>
 
-        <Link href="/new-listing">
-          <Button type="text">New Listing</Button>
-        </Link>
+        {user && (
+          <Link href="/new-listing">
+            <Button type="default">New Listing</Button>
+          </Link>
+        )}
 
         {!user ? (
           <>

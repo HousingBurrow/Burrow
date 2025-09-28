@@ -21,8 +21,8 @@ export default function ProfileLayout({ children }: { children: React.ReactNode 
         <Sider
           width={220}
           style={{
-            background: '#fff',
-            borderRight: '1px solid #f0f0f0',
+            background: '#DCCFC0',
+            borderRight: '1px solid #DCCFC0',
             paddingTop: 8,
           }}
         >
@@ -40,7 +40,7 @@ export default function ProfileLayout({ children }: { children: React.ReactNode 
         {/* Full-width content area */}
         <Content
           style={{
-            background: '#fff',
+            background: '#DCCFC0',
             padding: 24,
             minHeight: '100%',
           }}

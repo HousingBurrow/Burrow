@@ -91,9 +91,28 @@ export default function AccountInformationPage({
           <Form.Item
             label="Email"
             name="email"
-            rules={[{ required: true, message: "Please input your email!" }]}
+            rules={[
+              { required: true, message: "Please input your email!" },
+              {
+                type: "email",
+                message: "Please enter a valid email!",
+              },
+              {
+                validator: (_, value) => {
+                  if (!value || value.endsWith("@gatech.edu")) {
+                    return Promise.resolve();
+                  }
+                  return Promise.reject(
+                    new Error("Only @gatech.edu emails are allowed")
+                  );
+                },
+              },
+            ]}
           >
-            <Input placeholder="Enter email" />
+            <Input
+              value={user?.primaryEmail ?? ""}
+              placeholder="Enter your email"
+            />
           </Form.Item>
 
           <Form.Item
