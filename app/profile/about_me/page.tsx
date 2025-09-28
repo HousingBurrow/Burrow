@@ -61,7 +61,7 @@ export default function AboutMePage() {
   return (
     <Space direction="vertical" size="large" style={{ display: 'flex' }}>
       <Card>
-        <Space direction="vertical" align="center" style={{ width: '100%' }}>
+        <Space direction="vertical" align="center" style={{ width: '100%'}}>
           <Avatar size={96} icon={<UserOutlined />} />
 
           <Typography.Title level={4} style={{ marginBottom: 0 }}>
